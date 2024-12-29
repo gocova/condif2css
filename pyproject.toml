@@ -1,0 +1,20 @@
+[project]
+name = "condif2css"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "lxml>=5.3.0",
+    "openpyxl>=3.1.5",
+    "pytest-cov>=6.0.0",
+    "pytest>=8.3.4",
+    "build>=1.2.2.post1",
+]
+
+[tool.pyright]
+venvPath = "."
+venv = "venv"
+
+[tool.pytest.ini_options]
+addopts = ["--import-mode=importlib"]
