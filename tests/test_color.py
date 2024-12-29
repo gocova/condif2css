@@ -47,7 +47,7 @@ def test_rgb_to_ms_hls_3():
     assert rgb_to_ms_hls(0.9137254901960784, 0.44313725490196076, 0.19607843137254902) == (14,133,193)
 
 def test_0():
-    print(ms_hls_to_rgb(140, 189, 155))
+    # print(ms_hls_to_rgb(140, 189, 155))
     assert ms_hls_to_rgb(140, 189, 155) == (0.6502604166666667, 0.7874999999999999, 0.9247395833333333)
 
 def test_rgb_to_hex_multi():

@@ -18,24 +18,6 @@ testing_theme = ['FFFFFF',
  '467886',
  '96607D']
 
-# class Color:
-#     # type: str
-#     # color: str | None
-
-#     def __init__(self
-#         , type:str
-#         , aRGB: str|None = None
-#         , value: int|None = None, tint: float|None = None
-#     ):
-#         self.type = type
-
-#         # For rgb
-#         self.rgb = aRGB
-
-#         # For themed
-#         self.value = value
-#         self.tint = tint if isinstance(tint, float) else 0.0
-
 
 def test_normalize_rgb_color():
     normalize = create_themed_get_css_color(testing_theme)
@@ -75,3 +57,8 @@ def test_normalize_theme_invalid_value():
     normalize = create_themed_get_css_color(testing_theme)
     testing_color = Color(theme=32)
     assert normalize(testing_color) == "00000000"
+
+def test_normalize_indexed_color():
+    normalize = create_themed_get_css_color(testing_theme)
+    testing_color = Color(indexed=24)
+    assert normalize(testing_color) == '009999FF'
