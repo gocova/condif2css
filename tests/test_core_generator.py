@@ -3,7 +3,7 @@ sys.path.append('src')
 
 from condif2css import create_themed_get_css_color
 from openpyxl.styles import Color
-from condif2css.color import aRGB_to_CSS
+from condif2css.color import aRGB_to_css
 
 testing_theme = ['FFFFFF',
  '000000',
@@ -24,14 +24,14 @@ def test_normalize_rgb_color():
     testing_color = Color(rgb="00AABBCC")
     result = normalize(testing_color)
     assert result == "00AABBCC"
-    assert aRGB_to_CSS(result) == '#AABBCC'
+    assert aRGB_to_css(result) == '#AABBCC'
 
 def test_normalize_argb_color():
     normalize = create_themed_get_css_color(testing_theme)
     testing_color = Color(rgb="AAAABBCC")
     result = normalize(testing_color)
     assert result == "AAAABBCC"
-    assert aRGB_to_CSS(result) == "rgba(170, 187, 204, 170)"
+    assert aRGB_to_css(result) == "rgba(170, 187, 204, 170)"
 
 def test_normalize_theme_no_tint():
     normalize = create_themed_get_css_color(testing_theme)
@@ -41,7 +41,7 @@ def test_normalize_theme_no_tint():
     assert testing_color.tint == 0.0
     result = normalize(testing_color)
     assert result == '00E97132'
-    assert aRGB_to_CSS(result)  == "#E97132"
+    assert aRGB_to_css(result)  == "#E97132"
 
 def test_normalize_theme_tint():
     normalize = create_themed_get_css_color(testing_theme)
@@ -51,7 +51,7 @@ def test_normalize_theme_tint():
     assert testing_color.tint == 0.5
     result = normalize(testing_color)
     assert result == '0065BFE6'
-    assert aRGB_to_CSS(result)  == "#65BFE6"
+    assert aRGB_to_css(result)  == "#65BFE6"
 
 def test_normalize_theme_invalid_value():
     normalize = create_themed_get_css_color(testing_theme)

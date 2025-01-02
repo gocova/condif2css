@@ -1,3 +1,10 @@
+# Copyright (c) 2025 Jose Gonzalo Covarrubias M <gocova.dev@gmail.com>
+#
+# Part of: batch_xlsx2html (bxx2html)
+#
+# Aknowledge:
+#   - Inspiration from xlsx2html, extended with theme support and aRGB colors
+
 from openpyxl.styles.colors import COLOR_INDEX, Color, aRGB_REGEX
 from .color import (
     aRGB_to_ms_hls,
@@ -8,6 +15,7 @@ from .color import (
 
 
 def create_themed_get_css_color(theme_aRGBs_list: list[str]):
+    """Create a get_css_color based on provided theme"""
     if theme_aRGBs_list is None or (
         isinstance(theme_aRGBs_list, list) and len(theme_aRGBs_list) < 2
     ):
@@ -15,7 +23,6 @@ def create_themed_get_css_color(theme_aRGBs_list: list[str]):
     theme_len = len(theme_aRGBs_list)
 
     def cova__get_css_color(color: Color):
-        # print(f"Color - type:{color.type} value:{color.value} tint:{color.tint}")
         rgb = None
 
         if color.type == "theme":
@@ -52,7 +59,6 @@ def create_themed_get_css_color(theme_aRGBs_list: list[str]):
                     rgb = theme_aRGBs_list[0]  # 'lt1' | window
             rgb = "00000000" if not rgb or not aRGB_REGEX.match(rgb) else rgb
 
-        # print(rgb)
         return rgb if isinstance(rgb, str) else None
 
     return cova__get_css_color

@@ -1,29 +1,29 @@
 import sys
 sys.path.append('src')
 
-from condif2css.color import aRGB_to_CSS, ms_hls_to_rgb, rgb_to_hex, rgb_to_ms_hls, tint_luminance, aRGB_to_ms_hls
+from condif2css.color import aRGB_to_css, ms_hls_to_rgb, rgb_to_hex, rgb_to_ms_hls, tint_luminance, aRGB_to_ms_hls
 import pytest
 
 def test_to_css_rgb():
-    assert aRGB_to_CSS('AABBDD') == '#AABBDD'
+    assert aRGB_to_css('AABBDD') == '#AABBDD'
 
 def test_to_css_rgba():
-    assert aRGB_to_CSS('AAAABBDD') == 'rgba(170, 187, 221, 170)'
+    assert aRGB_to_css('AAAABBDD') == 'rgba(170, 187, 221, 170)'
 
 def test_to_css_rgba_zero_alpha():
-    assert aRGB_to_CSS('00AABBDD') == '#AABBDD'
+    assert aRGB_to_css('00AABBDD') == '#AABBDD'
 
 def test_to_css_no_aRGB():
     with pytest.raises(ValueError):
-        aRGB_to_CSS('no aRGB color')
+        aRGB_to_css('no aRGB color')
 
 def test_to_css_no_str_arg():
     with pytest.raises(TypeError):
-        aRGB_to_CSS(None) # type: ignore
+        aRGB_to_css(None) # type: ignore
 
 def test_to_css_no_args():
     with pytest.raises(TypeError):
-        aRGB_to_CSS() # type: ignore
+        aRGB_to_css() # type: ignore
 
 def test_rgb_to_hex():
     assert rgb_to_hex(1.0,0.5,0.0) == 'FF8000'
@@ -67,7 +67,7 @@ def test_complex_0():
     rgb_base = '0E2841'
     assert aRGB_to_ms_hls(rgb_base) == (140, 37, 155)
     h_part, l_part, s_part = aRGB_to_ms_hls(rgb_base)
-    tint = 0.749992370372631
+    tint:float = 0.749992370372631
     pre = ms_hls_to_rgb(h_part, tint_luminance(tint, l_part), s_part)
     assert pre == (0.6502604166666667, 0.7874999999999999, 0.9247395833333333)
     assert f'00{rgb_to_hex(*pre)}'== '00A6C9EC'
