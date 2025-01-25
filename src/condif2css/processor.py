@@ -4,6 +4,8 @@ from typing import List, Tuple
 import logging
 import re
 
+from condif2css.exparser import parse
+
 CONTAINS_TEXT_REGEXP = re.compile(
     r'NOT\(ISERROR\(SEARCH\("(?P<text>.+)"\s*,\s*(?P<reference>\$?[A-Z]+\$?[1-9]+\d*)\)\)\)'  # r-string
 )
@@ -105,7 +107,21 @@ def process(
                                 f"process: Only 1 formula per rule is currently supported! Skipping rule: {rule}"
                             )
                     else:
-                        print(rule)
+                        parse_result = parse(formulas, sheet)
+                        if parse_result is not None:
+                            results.append(
+                                (
+                                    row_id,
+                                    group_id,
+                                    cf_range,
+                                    dxfId,
+                                    cf_stop_if_true
+                                    if cf_stop_if_true is not None
+                                    else False,
+                                )
+                            )
+                        else:
+                            logging.error(f"process: Unsupported rule: {rule}")
                 row_id += 1
             group_id += 1
 
