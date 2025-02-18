@@ -6,10 +6,8 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "lxml>=5.3.0",
+    "mvin>=0.5.0b4",
     "openpyxl>=3.1.5",
-    "pytest-cov>=6.0.0",
-    "pytest>=8.3.4",
-    "build>=1.2.2.post1",
 ]
 
 [tool.pyright]
@@ -18,3 +16,9 @@ venv = "venv"
 
 [tool.pytest.ini_options]
 addopts = ["--import-mode=importlib"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
+]
