@@ -1,7 +1,7 @@
 import logging
 from hashlib import blake2b
-from typing import Any, Callable, Dict, Iterable, List, Tuple, Literal
-from openpyxl.cell import Cell
+from typing import Any, Callable, Dict, Iterable, List, Set, Tuple, Literal
+from openpyxl.cell import Cell, MergedCell
 from openpyxl.styles.colors import Color
 from openpyxl.styles.differential import DifferentialStyle
 
@@ -173,13 +173,13 @@ class CssRulesRegistry:
 
     def get_rules(self) -> List[str]:
         return [
-            f"{self._classnames[index]} {css_rule}"
+            f".{self._classnames[index]} {css_rule}"
             for index, css_rule in enumerate(self._rules)
         ]
 
 
 def get_border_styles_from_cell(
-    cell: Cell | DifferentialStyle,
+    cell: Cell | MergedCell | DifferentialStyle,
     css_builder: CssBuilder,
     is_important: bool = False,
 ) -> List[Tuple[str, str]]:
@@ -208,10 +208,10 @@ def get_border_styles_from_cell(
 
 def create_get_css_from_cell(css_registry: CssRulesRegistry, css_builder: CssBuilder):
     def get_css_from_cell(
-        cell: Cell | DifferentialStyle,
+        cell: Cell | MergedCell | DifferentialStyle,
         merged_cell_map=None,
         is_important: bool = False,
-    ):
+    ) -> Set[str]:
         nonlocal css_builder
 
         # print(cell)

@@ -1,5 +1,5 @@
 version = 1
-requires-python = ">=3.9"
+requires-python = ">=3.9, <4.0"
 
 [[package]]
 name = "colorama"
@@ -12,8 +12,8 @@ wheels = [
 
 [[package]]
 name = "condif2css"
-version = "0.1.0"
-source = { virtual = "." }
+version = "0.4.0b1"
+source = { editable = "." }
 dependencies = [
     { name = "lxml" },
     { name = "mvin" },
