@@ -157,7 +157,7 @@ class CssRulesRegistry:
 
         if css_rule_hash in self._hash_rels:
             rule_index = self._hash_rels[css_rule_hash]
-            print(f"rule[{rule_index}]: {self._classnames[rule_index]}")
+            logging.debug(f"register: rule[{rule_index}] --> {self._classnames[rule_index]}")
             return self._classnames[rule_index]
 
         rule_index = len(self._rules)
@@ -167,7 +167,7 @@ class CssRulesRegistry:
         self._classnames.append(classname)
         self._hash_rels[css_rule_hash] = rule_index
 
-        print(f"rule[{rule_index}]: {classname}")
+        logging.debug(f"register: rule[{rule_index}] --> {classname}")
 
         return classname
 
@@ -252,13 +252,13 @@ def create_get_css_from_cell(css_registry: CssRulesRegistry, css_builder: CssBui
 
         css_color = []
         cell_fill = getattr(cell, "fill")
-        print(f"--> cell.fill: {cell_fill}")
+        logging.debug(f"get_css_from_cell: Processing --> cell.fill: {cell_fill}")
         if cell_fill is not None:
-            print(f"-->> {isinstance(cell, DifferentialStyle)}")
+            logging.debug(f"get_css_from_cell: got DifferentialStyle -->> {isinstance(cell, DifferentialStyle)}")
 
             if not isinstance(cell, DifferentialStyle):
                 cell_fill_pattern_type = getattr(cell_fill, "patternType")
-                print(f"--> --> patternType: {cell_fill_pattern_type}")
+                # print(f"--> --> patternType: {cell_fill_pattern_type}")
                 if cell_fill_pattern_type is not None:
                     if cell_fill_pattern_type == "solid":
                         background_color = css_builder.background_color(
@@ -286,7 +286,7 @@ def create_get_css_from_cell(css_registry: CssRulesRegistry, css_builder: CssBui
 
         css_font = []
         cell_font = getattr(cell, "font")
-        print(f"--> cell.font: {cell_font}")
+        logging.debug(f"get_css_from_cell: Processing --> cell.font: {cell_font}")
         if cell_font is not None:
             cell_font_size = getattr(cell_font, "sz")
             if cell_font_size:
