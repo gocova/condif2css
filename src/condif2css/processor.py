@@ -1,10 +1,12 @@
-# from openpyxl.worksheet._read_only import ReadOnlyWorksheet
+from collections.abc import Iterable
+from mvin import TokenString
+from mvin.functions.excel_lib import TokenNumber
 from openpyxl.worksheet.worksheet import Worksheet
-from typing import List, Tuple
+from openpyxl.formula.tokenizer import Tokenizer
+from mvin.interpreter import get_interpreter
+from typing import Dict, Tuple
 import logging
 import re
-
-from condif2css.exparser import parse
 
 CONTAINS_TEXT_REGEXP = re.compile(
     r'NOT\(ISERROR\(SEARCH\("(?P<text>.+)"\s*,\s*(?P<reference>\$?[A-Z]+\$?[1-9]+\d*)\)\)\)'  # r-string
@@ -48,21 +50,35 @@ PRECOMPILED_TEXT_EXPRS = {
 
 def process(
     sheet: Worksheet,  # required for styles? and reference
-) -> List[Tuple[int, int, str, int, int, bool]]:
-    results = []
+    # differential_styles,
+    # ) -> List[Tuple[int, int, str, int, int, bool]]:
+) -> Dict[str, Tuple[str, str, int, int, bool]]:
+    """
+    Returns:
+        Dict[
+            key
+            , Tuple[
+                sheetname
+                cell_ref
+                priority
+                dxf_id
+                stop_if_true
+    """
+    results: Dict[str, Tuple[str, str, int, int, bool]] = {}
     if sheet.conditional_formatting is not None:
         group_id = 0
         row_id = 0
         for cf in sheet.conditional_formatting:
             cf_range = str(cf.cells)
             for rule in cf.rules:
-                dxfId = rule.dxfId
-                if dxfId is not None:
+                dxf_id = rule.dxfId
+                if dxf_id is not None:
                     cf_type = rule.type
-                    priority = rule.priority
+                    cf_priority = rule.priority
                     cf_text = rule.text
                     formulas = rule.formula
                     cf_stop_if_true = rule.stopIfTrue
+                    # print(formulas)
 
                     possible_text_expr = PRECOMPILED_TEXT_EXPRS.get(cf_type)
                     if possible_text_expr is not None:
@@ -82,18 +98,33 @@ def process(
                                             and isinstance(cell_value, str)
                                             and check_func(cell_value, cf_text)
                                         ):
-                                            results.append(
-                                                (
-                                                    row_id,
-                                                    group_id,
-                                                    cf_range,
-                                                    priority,
-                                                    dxfId,
-                                                    cf_stop_if_true
-                                                    if cf_stop_if_true is not None
-                                                    else False,
-                                                )
+                                            # results.append(
+                                            #     (
+                                            #         row_id,
+                                            #         group_id,
+                                            #         cf_range,
+                                            #         cf_priority,
+                                            #         dxf_id,
+                                            #         cf_stop_if_true
+                                            #         if cf_stop_if_true is not None
+                                            #         else False,
+                                            #     )
+                                            # )
+                                            code = f"{sheet.title}\\!{cell.coordinate}"
+                                            proposed_style = (
+                                                sheet.title,
+                                                cell.coordinate,
+                                                cf_priority,
+                                                dxf_id,
+                                                cf_stop_if_true
+                                                if cf_stop_if_true is not None
+                                                else False,
                                             )
+                                            if code in results:
+                                                _, _, old_priority, _, _ = results[code]
+                                                if old_priority >= cf_priority:
+                                                    continue
+                                            results[code] = proposed_style
                                     else:
                                         logging.error(
                                             f"process: Invalid cell reference found in formula '{formulas[0]}'"
@@ -107,21 +138,111 @@ def process(
                                 f"process: Only 1 formula per rule is currently supported! Skipping rule: {rule}"
                             )
                     else:
-                        parse_result = parse(formulas, sheet)
-                        if parse_result is not None:
-                            results.append(
-                                (
-                                    row_id,
-                                    group_id,
-                                    cf_range,
-                                    dxfId,
-                                    cf_stop_if_true
-                                    if cf_stop_if_true is not None
-                                    else False,
-                                )
+                        if len(formulas) == 1:
+                            curr_formula_str = formulas[0]
+                            curr_formula_str = (
+                                curr_formula_str
+                                if curr_formula_str.startswith("=")
+                                else f"={curr_formula_str}"
                             )
+                            curr_tokenizer = Tokenizer(curr_formula_str)
+                            if curr_tokenizer and curr_tokenizer.items:
+                                curr_formula = get_interpreter(curr_tokenizer.items)
+                                if curr_formula:
+                                    ref_values = {}
+                                    curr_formula_inputs = getattr(
+                                        curr_formula, "inputs", None
+                                    )
+                                    if isinstance(curr_formula_inputs, set):
+                                        # curr_formula_inputs = cast(
+                                        #     Set[str], curr_formula.inputs
+                                        # )
+                                        for ref in curr_formula_inputs:
+                                            curr_ref_value = getattr(
+                                                sheet[ref], "value", None
+                                            )
+                                            if isinstance(curr_ref_value, str):
+                                                ref_values[ref] = TokenString(
+                                                    curr_ref_value
+                                                )
+                                            elif isinstance(
+                                                curr_ref_value, int
+                                            ) or isinstance(curr_ref_value, float):
+                                                ref_values[ref] = TokenNumber(
+                                                    curr_ref_value
+                                                )
+                                    formula_result = curr_formula(ref_values)
+                                    if isinstance(formula_result, bool):
+                                        if formula_result:
+                                            for specific_range in cf_range.split(" "):
+                                                print(
+                                                    f" > Saving specific_range for each cell of '{specific_range}'"
+                                                )
+                                                print(
+                                                    f" > CellRange: {sheet[specific_range]}"
+                                                )
+                                                possible_range = sheet[specific_range]
+                                                for row in (
+                                                    possible_range
+                                                    if isinstance(
+                                                        possible_range, Iterable
+                                                    )
+                                                    else ((possible_range,),)
+                                                ):
+                                                    for cell in row:
+                                                        code = f"{sheet.title}\\!{cell.coordinate}"
+                                                        proposed_style = (
+                                                            sheet.title,
+                                                            cell.coordinate,
+                                                            cf_priority,
+                                                            dxf_id,
+                                                            cf_stop_if_true
+                                                            if cf_stop_if_true
+                                                            is not None
+                                                            else False,
+                                                        )
+                                                        if code in results:
+                                                            _, _, old_priority, _, _ = (
+                                                                results[code]
+                                                            )
+                                                            if (
+                                                                old_priority
+                                                                >= cf_priority
+                                                            ):
+                                                                continue
+                                                        results[code] = proposed_style
+                                    else:
+                                        logging.warning(
+                                            f"process: Expected bool for result, but '{formula_result}' was found!"
+                                        )
+                                else:
+                                    logging.warning(
+                                        f"process: Unable to get callable formula from: '{curr_formula_str}'"
+                                    )
+                            else:
+                                logging.warning(
+                                    f"process: Unable to parse formula: '{curr_formula_str}'"
+                                )
                         else:
-                            logging.error(f"process: Unsupported rule: {rule}")
+                            logging.warning(
+                                f"process: Only 1 formula per rule is currently supporter! Skipping rule: {rule}"
+                            )
+
+                        # parse_result = parse(formulas, sheet)
+                        # if parse_result is not None:
+                        #     results.append(
+                        #         (
+                        #             row_id,
+                        #             group_id,
+                        #             cf_range,
+                        #             dxf_id,
+                        #             cf_stop_if_true
+                        #             if cf_stop_if_true is not None
+                        #             else False,
+                        #         )
+                        #     )
+                        # else:
+                        #     logging.error(f"process: Unsupported rule: {rule}")
                 row_id += 1
             group_id += 1
 
