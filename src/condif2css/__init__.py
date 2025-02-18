@@ -5,3 +5,5 @@
 
 from .core import create_themed_get_css_color
 from .themes import get_theme_colors
+
+__version__ = "0.4.0b1"
