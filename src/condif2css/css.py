@@ -157,7 +157,9 @@ class CssRulesRegistry:
 
         if css_rule_hash in self._hash_rels:
             rule_index = self._hash_rels[css_rule_hash]
-            logging.debug(f"register: rule[{rule_index}] --> {self._classnames[rule_index]}")
+            logging.debug(
+                f"register: rule[{rule_index}] --> {self._classnames[rule_index]}"
+            )
             return self._classnames[rule_index]
 
         rule_index = len(self._rules)
@@ -254,7 +256,9 @@ def create_get_css_from_cell(css_registry: CssRulesRegistry, css_builder: CssBui
         cell_fill = getattr(cell, "fill")
         logging.debug(f"get_css_from_cell: Processing --> cell.fill: {cell_fill}")
         if cell_fill is not None:
-            logging.debug(f"get_css_from_cell: got DifferentialStyle -->> {isinstance(cell, DifferentialStyle)}")
+            logging.debug(
+                f"get_css_from_cell: got DifferentialStyle -->> {isinstance(cell, DifferentialStyle)}"
+            )
 
             if not isinstance(cell, DifferentialStyle):
                 cell_fill_pattern_type = getattr(cell_fill, "patternType")
@@ -305,15 +309,15 @@ def create_get_css_from_cell(css_registry: CssRulesRegistry, css_builder: CssBui
                     css_font.append(css_font_color)
 
             cell_font_b = getattr(cell_font, "b")
-            if cell_font_b is not None:
+            if cell_font_b:
                 css_font.append(css_builder.font_bold(is_important=is_important))
 
             cell_font_i = getattr(cell_font, "i")
-            if cell_font_i is not None:
+            if cell_font_i:
                 css_font.append(css_builder.font_italic(is_important=is_important))
 
             cell_font_u = getattr(cell_font, "u")
-            if cell_font_u is not None:
+            if cell_font_u:
                 css_font.append(css_builder.font_underline(is_important=is_important))
 
         if len(css_font) > 0:
