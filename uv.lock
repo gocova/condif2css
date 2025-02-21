@@ -12,8 +12,8 @@ wheels = [
 
 [[package]]
 name = "condif2css"
-version = "0.4.0b1"
-source = { editable = "." }
+version = "0.7.0b2"
+source = { virtual = "." }
 dependencies = [
     { name = "lxml" },
     { name = "mvin" },
@@ -29,7 +29,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "lxml", specifier = ">=5.3.0" },
-    { name = "mvin", specifier = ">=0.5.0b4" },
+    { name = "mvin", specifier = ">=0.11.0b1" },
     { name = "openpyxl", specifier = ">=3.1.5" },
 ]
 
@@ -247,11 +247,11 @@ wheels = [
 
 [[package]]
 name = "mvin"
-version = "0.5.0b4"
+version = "0.11.0b1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b6/fb/eeb60c88c8bfc1ca8bbbdf9fca14240ab55f3277b68e88c67d0f774d1295/mvin-0.5.0b4.tar.gz", hash = "sha256:860a857a0c0ddfa6391d10012ec08072f3faf0899c8603541874f443e53627a6", size = 20762 }
+sdist = { url = "https://files.pythonhosted.org/packages/ae/06/8b022a0c88725ce4eed34bc3d8bfff7ebdc5560d98f4907db7377edb9563/mvin-0.11.0b1.tar.gz", hash = "sha256:0aca7de8f325f76391ba5ca201fd1c2ff9737719969268a1dca3fd233eb82f66", size = 21215 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5e/d1/bb199e4a5aaf144c1b549d1e989e8ac1467c1474044c178390372de99596/mvin-0.5.0b4-py3-none-any.whl", hash = "sha256:fac74ad6b9654cc5d65b070a74ec9bfb156acd6c113dee9f5149592d63277f87", size = 17278 },
+    { url = "https://files.pythonhosted.org/packages/af/42/f733a91805647d2791fe181d12db2fdc3654be3ce81bdfcffdede8fccd79/mvin-0.11.0b1-py3-none-any.whl", hash = "sha256:2f7202286aaf3eeae3d6580a953dbcc3fa785c2097cc63cf661b910c4cf7dcb4", size = 17710 },
 ]
 
 [[package]]

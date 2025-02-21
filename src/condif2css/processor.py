@@ -46,14 +46,11 @@ def process(
         row_id = 0
         for cf in sheet.conditional_formatting:
             cf_range = str(cf.cells)
-            print(f"\ncf range:{cf_range}")
+            logging.debug(f"process: cf -> range: {cf_range}")
             for rule in cf.rules:
-                print(rule)
                 dxf_id = rule.dxfId
                 if dxf_id is not None:
-                    # cf_type = rule.type
                     cf_priority = rule.priority
-                    # cf_text = rule.text
                     formulas = rule.formula
                     cf_stop_if_true = rule.stopIfTrue
 
@@ -64,11 +61,10 @@ def process(
                             if curr_formula_str.startswith("=")
                             else f"={curr_formula_str}"
                         )
-                        print(f"formula[p: {cf_priority}] -> {curr_formula_str}")
+                        logging.debug(f"process: cf formula[p: {cf_priority}] -> {curr_formula_str}")
                         curr_tokenizer = Tokenizer(curr_formula_str)
                         if curr_tokenizer and curr_tokenizer.items:
-                            logger = logging.getLogger()
-                            # logger.setLevel(logging.DEBUG)
+
                             curr_formula = get_interpreter(
                                 [
                                     x
@@ -114,7 +110,7 @@ def process(
                                     curr_formula_inputs = getattr(
                                         curr_formula, "inputs", None
                                     )
-                                    print(
+                                    logging.debug(
                                         f"process: Using formula inputs: {curr_formula_inputs}"
                                     )
                                     for specific_range in cf_range.split(" "):
@@ -160,7 +156,6 @@ def process(
                                                                         None,
                                                                     )
                                                                 )
-                                                                print(curr_ref_value)
                                                                 if isinstance(
                                                                     curr_ref_value, str
                                                                 ):
@@ -205,14 +200,14 @@ def process(
                                                     formula_result = curr_formula(
                                                         ref_values
                                                     )
-                                                    logger.setLevel(logging.INFO)
-                                                    print(
-                                                        f"formula_result: {formula_result}"
+
+                                                    logging.debug(
+                                                        f"process: Formula result -> {formula_result}"
                                                     )
 
                                                     if isinstance(formula_result, bool):
                                                         if formula_result:
-                                                            print(
+                                                            logging.debug(
                                                                 f"process: Applying differential style with index: {dxf_id} for cell['{cell.coordinate}']"
                                                             )
                                                             code = f"{sheet.title}\\!{cell.coordinate}"
