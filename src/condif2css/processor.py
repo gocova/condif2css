@@ -10,6 +10,7 @@ import logging
 
 def process(
     sheet: Worksheet,  # required for styles? and reference
+    fail_ok: bool = True,
 ) -> Dict[str, Tuple[str, str, int, int, bool]]:
     """
     Returns:
@@ -61,10 +62,11 @@ def process(
                             if curr_formula_str.startswith("=")
                             else f"={curr_formula_str}"
                         )
-                        logging.debug(f"process: cf formula[p: {cf_priority}] -> {curr_formula_str}")
+                        logging.debug(
+                            f"process: cf formula[p: {cf_priority}] -> {curr_formula_str}"
+                        )
                         curr_tokenizer = Tokenizer(curr_formula_str)
                         if curr_tokenizer and curr_tokenizer.items:
-
                             curr_formula = get_interpreter(
                                 [
                                     x
@@ -197,50 +199,59 @@ def process(
                                                             should_apply_func = False
                                                             break
                                                 if should_apply_func:
-                                                    formula_result = curr_formula(
-                                                        ref_values
-                                                    )
-
-                                                    logging.debug(
-                                                        f"process: Formula result -> {formula_result}"
-                                                    )
-
-                                                    if isinstance(formula_result, bool):
-                                                        if formula_result:
-                                                            logging.debug(
-                                                                f"process: Applying differential style with index: {dxf_id} for cell['{cell.coordinate}']"
-                                                            )
-                                                            code = f"{sheet.title}\\!{cell.coordinate}"
-                                                            proposed_style = (
-                                                                sheet.title,
-                                                                cell.coordinate,
-                                                                cf_priority,
-                                                                dxf_id,
-                                                                cf_stop_if_true
-                                                                if cf_stop_if_true
-                                                                is not None
-                                                                else False,
-                                                            )
-                                                            if code in results:
-                                                                (
-                                                                    _,
-                                                                    _,
-                                                                    old_priority,
-                                                                    _,
-                                                                    _,
-                                                                ) = results[code]
-                                                                if (
-                                                                    old_priority
-                                                                    <= cf_priority
-                                                                ):
-                                                                    continue
-                                                            results[code] = (
-                                                                proposed_style
-                                                            )
-                                                    else:
-                                                        logging.warning(
-                                                            f"process: Expected bool for result, but '{formula_result}' was found!"
+                                                    try:
+                                                        formula_result = curr_formula(
+                                                            ref_values
                                                         )
+
+                                                        logging.debug(
+                                                            f"process: Formula result -> {formula_result}"
+                                                        )
+
+                                                        if isinstance(
+                                                            formula_result, bool
+                                                        ):
+                                                            if formula_result:
+                                                                logging.debug(
+                                                                    f"process: Applying differential style with index: {dxf_id} for cell['{cell.coordinate}']"
+                                                                )
+                                                                code = f"{sheet.title}\\!{cell.coordinate}"
+                                                                proposed_style = (
+                                                                    sheet.title,
+                                                                    cell.coordinate,
+                                                                    cf_priority,
+                                                                    dxf_id,
+                                                                    cf_stop_if_true
+                                                                    if cf_stop_if_true
+                                                                    is not None
+                                                                    else False,
+                                                                )
+                                                                if code in results:
+                                                                    (
+                                                                        _,
+                                                                        _,
+                                                                        old_priority,
+                                                                        _,
+                                                                        _,
+                                                                    ) = results[code]
+                                                                    if (
+                                                                        old_priority
+                                                                        <= cf_priority
+                                                                    ):
+                                                                        continue
+                                                                results[code] = (
+                                                                    proposed_style
+                                                                )
+                                                        else:
+                                                            logging.warning(
+                                                                f"process: Expected bool for result, but '{formula_result}' was found!"
+                                                            )
+                                                    except Exception as exc:
+                                                        logging.error(
+                                                            f"process: Exception found during formula '{curr_formula_str}' evaluation for reference '{cell.coordinate}' -> {str(exc)}"
+                                                        )
+                                                        if not fail_ok:
+                                                            raise exc
                                 else:
                                     logging.warning(
                                         f"process: Unable to get anchor cell from range '{cf_ranges_list[0]}' to apply conditional formatting formula!"
