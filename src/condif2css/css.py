@@ -137,47 +137,53 @@ class CssBuilder:
 
 
 class CssRulesRegistry:
-    def __init__(self, prefix: str = "xx2h") -> None:
+    def __init__(self, prefix: str = "xx2h", digest_size: int = 28) -> None:
         self._prefix = prefix
-        self._rules: List[str] = []
-        self._rules_source: List[Dict[str, str]] = []
-        self._classnames: List[str] = []
-        self._hash_rels: Dict[str, int] = {}
+        # self._rules: List[str] = []
+        # self._rules_source: List[Dict[str, str]] = []
+        # self._classnames: List[str] = []
+        # self._hash_rels: Dict[str, int] = {}
+        self._existing_rules: Dict[
+            str,
+            Tuple[
+                str,  # classname
+                str,  # css_rule_contents
+                Dict[str, str],  # rule_source
+            ],
+        ] = {}
+        self._digest_size = digest_size
 
     def register(self, items: Iterable) -> str:
-        new_rule = dict(items)
-        css_rule_contents = "\n\t".join([f"{x[0]}: {x[1]};" for x in new_rule.items()])
-        css_rule_contents = f"{{\n\t{css_rule_contents}\n}}"
+        # Sort the input to ensure consistent rule generation and hashing
+        sorted_items = sorted(items)
 
-        hash_object = blake2b(digest_size=12)
+        # Build CSS rule string
+        css_properties = "\n\t".join(f"{k}: {v};" for k, v in sorted_items)
+        css_rule_contents = f"{{\n\t{css_properties}\n}}"
 
-        hash_object.update(f"{len(css_rule_contents)}|{css_rule_contents}".encode())
+        # Generate a stable hash for the rule
+        hash_input = f"{len(css_rule_contents)}|{css_rule_contents}".encode()
+        css_rule_hash = blake2b(hash_input, digest_size=self._digest_size).hexdigest()
 
-        css_rule_hash = hash_object.hexdigest()
+        # Check if this rule already exists
+        if css_rule_hash in self._existing_rules:
+            classname, _, _ = self._existing_rules[css_rule_hash]
+            logging.debug(f"register: rule[{css_rule_hash}] --> {classname}")
+            return classname
 
-        if css_rule_hash in self._hash_rels:
-            rule_index = self._hash_rels[css_rule_hash]
-            logging.debug(
-                f"register: rule[{rule_index}] --> {self._classnames[rule_index]}"
-            )
-            return self._classnames[rule_index]
+        # Register new rule
+        rule_count = len(self._existing_rules)
+        classname = f"{self._prefix}_x{hex(rule_count)[2:].zfill(4)}"
+        new_rule = dict(sorted_items)
 
-        rule_index = len(self._rules)
-        classname = f"{self._prefix}_x{hex(rule_index)[2:].zfill(4)}"
-        self._rules.append(css_rule_contents)
-        self._rules_source.append(new_rule)
-        self._classnames.append(classname)
-        self._hash_rels[css_rule_hash] = rule_index
+        self._existing_rules[css_rule_hash] = (classname, css_rule_contents, new_rule)
 
-        logging.debug(f"register: rule[{rule_index}] --> {classname}")
+        logging.debug(f"register: rule[{css_rule_hash}] --> {classname}")
 
         return classname
 
     def get_rules(self) -> List[str]:
-        return [
-            f".{self._classnames[index]} {css_rule}"
-            for index, css_rule in enumerate(self._rules)
-        ]
+        return [f".{t[0]} {t[1]}" for _, t in self._existing_rules.items()]
 
 
 def get_border_styles_from_cell(
