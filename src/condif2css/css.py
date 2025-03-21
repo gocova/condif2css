@@ -1,5 +1,5 @@
 import logging
-from hashlib import blake2b
+import blake3
 from typing import Any, Callable, Dict, Iterable, List, Set, Tuple, Literal
 from openpyxl.cell import Cell, MergedCell
 from openpyxl.styles.colors import Color
@@ -163,7 +163,7 @@ class CssRulesRegistry:
 
         # Generate a stable hash for the rule
         hash_input = f"{len(css_rule_contents)}|{css_rule_contents}".encode()
-        css_rule_hash = blake2b(hash_input, digest_size=self._digest_size).hexdigest()
+        css_rule_hash = blake3.blake3(hash_input).hexdigest(length=self._digest_size)
 
         # Check if this rule already exists
         if css_rule_hash in self._existing_rules:
