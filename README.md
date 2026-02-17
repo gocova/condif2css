@@ -17,16 +17,28 @@ The library is designed to work with `openpyxl` workbooks and is currently focus
 
 ## Installation
 
+Install from PyPI:
+
+```bash
+pip install condif2css
+```
+
+If the latest published version is a pre-release, use:
+
+```bash
+pip install --pre condif2css
+```
+
 Local development install:
 
 ```bash
 pip install -e .
 ```
 
-Or with `uv`:
+Or with `uv` (including dev dependencies):
 
 ```bash
-uv sync
+uv sync --group dev
 ```
 
 ## Quick Example
