@@ -1,29 +1,29 @@
 import sys
 sys.path.append('src')
 
-from condif2css.color import aRGB_to_css, ms_hls_to_rgb, rgb_to_hex, rgb_to_ms_hls, tint_luminance, aRGB_to_ms_hls
+from condif2css.color import argb_to_css, ms_hls_to_rgb, rgb_to_hex, rgb_to_ms_hls, tint_luminance, argb_to_ms_hls
 import pytest
 
 def test_to_css_rgb():
-    assert aRGB_to_css('AABBDD') == '#AABBDD'
+    assert argb_to_css('AABBDD') == '#AABBDD'
 
 def test_to_css_rgba():
-    assert aRGB_to_css('AAAABBDD') == 'rgba(170, 187, 221, 170)'
+    assert argb_to_css('AAAABBDD') == 'rgba(170, 187, 221, 170)'
 
 def test_to_css_rgba_zero_alpha():
-    assert aRGB_to_css('00AABBDD') == '#AABBDD'
+    assert argb_to_css('00AABBDD') == '#AABBDD'
 
 def test_to_css_no_aRGB():
     with pytest.raises(ValueError):
-        aRGB_to_css('no aRGB color')
+        argb_to_css('no aRGB color')
 
 def test_to_css_no_str_arg():
     with pytest.raises(TypeError):
-        aRGB_to_css(None) # type: ignore
+        argb_to_css(None) # type: ignore
 
 def test_to_css_no_args():
     with pytest.raises(TypeError):
-        aRGB_to_css() # type: ignore
+        argb_to_css() # type: ignore
 
 def test_rgb_to_hex():
     assert rgb_to_hex(1.0,0.5,0.0) == 'FF8000'
@@ -65,8 +65,8 @@ def test_mult():
 
 def test_complex_0():
     rgb_base = '0E2841'
-    assert aRGB_to_ms_hls(rgb_base) == (140, 37, 155)
-    h_part, l_part, s_part = aRGB_to_ms_hls(rgb_base)
+    assert argb_to_ms_hls(rgb_base) == (140, 37, 155)
+    h_part, l_part, s_part = argb_to_ms_hls(rgb_base)
     tint:float = 0.749992370372631
     pre = ms_hls_to_rgb(h_part, tint_luminance(tint, l_part), s_part)
     assert pre == (0.6502604166666667, 0.7874999999999999, 0.9247395833333333)
@@ -74,8 +74,8 @@ def test_complex_0():
 
 def test_complex_1():
     rgb_base = 'E97132'
-    assert aRGB_to_ms_hls(rgb_base) == (14, 133, 193)
-    h_part, l_part, s_part = aRGB_to_ms_hls(rgb_base)
+    assert argb_to_ms_hls(rgb_base) == (14, 133, 193)
+    h_part, l_part, s_part = argb_to_ms_hls(rgb_base)
     tint = 0.5999938962981048
     pre = ms_hls_to_rgb(h_part, tint_luminance(tint, l_part), s_part)
     assert pre == (0.9649131944444445, 0.7776093749999999, 0.6767534722222222)

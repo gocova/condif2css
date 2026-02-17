@@ -3,7 +3,7 @@
 # Part of: batch_xlsx2html (bxx2html)
 #
 
-from .core import create_themed_get_css_color
+from .core import create_themed_css_color_resolver
 from .themes import get_theme_colors
 
 __version__ = "0.12.0b6021600"

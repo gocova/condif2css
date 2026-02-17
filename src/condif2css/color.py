@@ -16,57 +16,57 @@ HLSMAX = 240  # MS excel's tint function expects that HLS is base 240. see:
 # https://social.msdn.microsoft.com/Forums/en-US/e9d8c136-6d62-4098-9b1b-dac786149f43/excel-color-tint-algorithm-incorrect?forum=os_binaryfile#d3c2ac95-52e0-476b-86f1-e2a697f24969
 
 
-def aRGB_to_ms_hls(aRGB: str) -> tuple[int, int, int]:
+def argb_to_ms_hls(argb: str) -> tuple[int, int, int]:
     """
     Converts a hex string of the form [aa]rrggbb to HLSMAX based HLS values. (alpha values are ignored)
 
-    :param aRGB: A hex string of the form [aa]rrggbb
+    :param argb: A hex string of the form [aa]rrggbb
     :return: A tuple containing the hue, lightness, and saturation of the color in the range (0, HLSMAX)
     :raises ValueError: If the color is not a valid aRGB hex value
-    :raises TypeError: If the aRGB arg is not an str
+    :raises TypeError: If the argb arg is not an str
     """
-    if isinstance(aRGB, str):
-        m = aRGB_REGEX.match(aRGB)
+    if isinstance(argb, str):
+        m = aRGB_REGEX.match(argb)
         if m is None:
             raise ValueError("Colors must be aRGB hex values")
-        if len(aRGB) > 6:
-            color_str = aRGB[-6:]  # Ignore alpha values
+        if len(argb) > 6:
+            color_str = argb[-6:]  # Ignore alpha values
         else:
-            color_str = aRGB
+            color_str = argb
         blue = int(color_str[4:], 16) / RGBMAX
         green = int(color_str[2:4], 16) / RGBMAX
         red = int(color_str[0:2], 16) / RGBMAX
         return rgb_to_ms_hls(red, green, blue)
 
     else:
-        raise TypeError("aRGB arg shoud be an str")
+        raise TypeError("argb arg shoud be an str")
 
 
-def aRGB_to_css(aRGB: str) -> str:
+def argb_to_css(argb: str) -> str:
     """
     Converts a hex string of the form [aa]rrggbb to CSS color string
 
-    :param aRGB: A hex string of the form [aa]rrggbb
+    :param argb: A hex string of the form [aa]rrggbb
     :return: A CSS color string representation of the given color
     :raises ValueError: If the color is not a valid aRGB hex value
-    :raises TypeError: If the aRGB arg is not an str
+    :raises TypeError: If the argb arg is not an str
     """
-    if isinstance(aRGB, str):
-        m = aRGB_REGEX.match(aRGB)
+    if isinstance(argb, str):
+        m = aRGB_REGEX.match(argb)
         if m is None:
             raise ValueError("Colors must be aRGB hex values")
-        if len(aRGB) == 6:
-            return f"#{aRGB}"
-        if aRGB.startswith("00"):
-            return f"#{aRGB[-6:]}"
-        blue = int(aRGB[6:], 16)
-        green = int(aRGB[4:6], 16)
-        red = int(aRGB[2:4], 16)
-        alpha = int(aRGB[0:2], 16)
+        if len(argb) == 6:
+            return f"#{argb}"
+        if argb.startswith("00"):
+            return f"#{argb[-6:]}"
+        blue = int(argb[6:], 16)
+        green = int(argb[4:6], 16)
+        red = int(argb[2:4], 16)
+        alpha = int(argb[0:2], 16)
         return f"rgba({red}, {green}, {blue}, {alpha})"
 
     else:
-        raise TypeError("aRGB arg shoud be an str")
+        raise TypeError("argb arg shoud be an str")
 
 
 def rgb_to_ms_hls(red: float, green: float, blue: float) -> tuple[int, int, int]:
@@ -113,7 +113,7 @@ def rgb_to_hex(red: float, green: float, blue: float) -> str:
     :param blue: The blue component of the color in the range (0,1)
     :return: A hex string representation of the given color
     :raises ValueError: If the color is not a valid RGB hex value
-    :raises TypeError: If the aRGB arg is not an str
+    :raises TypeError: If the argb arg is not an str
     """
     return (
         "%02x%02x%02x"

@@ -1,11 +1,15 @@
 # condif2css
 
+[![PyPI Version](https://img.shields.io/pypi/v/condif2css.svg)](https://pypi.org/project/condif2css/)
+[![License](https://img.shields.io/badge/License-MIT%20%2F%20Apache%202.0-green.svg)](https://opensource.org/licenses/)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support-orange?logo=buy-me-a-coffee&style=flat-square)](https://buymeacoffee.com/gocova)
+
 `condif2css` helps translate Excel conditional formatting into reusable CSS classes.
 
 The library is designed to work with `openpyxl` workbooks and is currently focused on:
 
 - Evaluating conditional-format formulas per cell (`processor.process`)
-- Resolving workbook/theme/indexed colors to aRGB (`create_themed_get_css_color`)
+- Resolving workbook/theme/indexed colors to aRGB (`create_themed_css_color_resolver`)
 - Building deduplicated CSS rules from `Cell` / `DifferentialStyle` objects (`css.py`)
 
 ## What It Does
@@ -46,27 +50,27 @@ uv sync --group dev
 ```python
 from openpyxl import load_workbook
 
-from condif2css import create_themed_get_css_color, get_theme_colors
-from condif2css.color import aRGB_to_css
+from condif2css import create_themed_css_color_resolver, get_theme_colors
+from condif2css.color import argb_to_css
 from condif2css.css import CssBuilder, CssRulesRegistry, create_get_css_from_cell
-from condif2css.processor import process
+from condif2css.processor import process_conditional_formatting
 
 wb = load_workbook("input.xlsx", data_only=True)
 ws = wb["Sheet1"]
 
 theme_colors = get_theme_colors(wb)
-get_argb = create_themed_get_css_color(theme_colors)
+get_argb = create_themed_css_color_resolver(theme_colors)
 
 def get_css_color(color):
     argb = get_argb(color)
-    return aRGB_to_css(argb) if isinstance(argb, str) else None
+    return argb_to_css(argb) if isinstance(argb, str) else None
 
 css_builder = CssBuilder(get_css_color)
 css_registry = CssRulesRegistry(prefix="cf")
 get_css_from_cell = create_get_css_from_cell(css_registry, css_builder)
 
 # { "Sheet1\\!A1": ("Sheet1", "A1", priority, dxf_id, stop_if_true), ... }
-matched_rules = process(ws)
+matched_rules = process_conditional_formatting(ws)
 
 # Apply each matched differential style and collect class names per cell
 cell_classes = {}
@@ -80,13 +84,13 @@ css_text = "\n".join(css_registry.get_rules())
 
 ## Public API (Current)
 
-- `condif2css.create_themed_get_css_color(theme_colors)`
+- `condif2css.create_themed_css_color_resolver(theme_colors)`
 - `condif2css.get_theme_colors(workbook)`
-- `condif2css.processor.process(sheet, fail_ok=True)`
+- `condif2css.processor.process_conditional_formatting(sheet, fail_ok=True)`
 - `condif2css.css.CssBuilder`
 - `condif2css.css.CssRulesRegistry`
 - `condif2css.css.create_get_css_from_cell(...)`
-- `condif2css.color.aRGB_to_css(...)` and color/tint utility helpers
+- `condif2css.color.argb_to_css(...)` and color/tint utility helpers
 
 ## Current Scope and Limitations
 
@@ -115,9 +119,10 @@ pytest
 
 ## License
 
-Dual-licensed under:
+Licensed under either of:
 
-- Apache-2.0 (`LICENSE_APACHE`)
-- MIT (`LICENSE_MIT`)
+- Apache License, Version 2.0 ([`LICENSE_APACHE`](LICENSE_APACHE) or <https://www.apache.org/licenses/LICENSE-2.0>)
+- MIT license ([`LICENSE_MIT`](LICENSE_MIT) or <https://opensource.org/licenses/MIT>)
 
-You may choose either license.
+at your option.
+
