@@ -4,7 +4,7 @@ name = "condif2css"
 authors = [
     { name = "Jose Gonzalo Covarrubias", email = "gocova.dev@gmail.com" },
 ]
-description = "Add your description here"
+description = "Evaluate Excel conditional formatting rules and generate reusable CSS classes from openpyxl styles."
 license = "MIT OR Apache-2.0"
 license-files = ["LICEN[CS]E*"]
 readme = "README.md"
@@ -23,17 +23,13 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    # "License :: OSI Approved :: MIT License",
-    # "License :: OSI Approved :: Apache Software License",
     "Development Status :: 4 - Beta",
 ]
 
 [project.urls]
-# Homepage = "https://example.com"
-# Documentation = "https://readthedocs.org"
-# Repository = "https://github.com/me/spam.git"
-# Issues = "https://github.com/me/spam/issues"
-# Changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
+Homepage = "https://bitbucket.org/gocova_dev/condif2css"
+Repository = "https://bitbucket.org/gocova_dev/condif2css"
+Issues = "https://bitbucket.org/gocova_dev/condif2css/issues"
 
 [tool.pyright]
 venvPath = "."
