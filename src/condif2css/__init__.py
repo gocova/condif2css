@@ -6,4 +6,4 @@
 from .core import create_themed_get_css_color
 from .themes import get_theme_colors
 
-__version__ = "0.11.0b5032102"
+__version__ = "0.12.0b6021600"
