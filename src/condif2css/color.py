@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Jose Gonzalo Covarrubias M <gocova.dev@gmail.com>
+# Copyright (c) 2026 Jose Gonzalo Covarrubias M <gocova.dev@gmail.com>
 #
 # Part of: batch_xlsx2html (bxx2html)
 #
@@ -17,7 +17,14 @@ HLSMAX = 240  # MS excel's tint function expects that HLS is base 240. see:
 
 
 def aRGB_to_ms_hls(aRGB: str) -> tuple[int, int, int]:
-    """Converts a hex string of the form '[aa]rrggbb' to HLSMAX based HLS, (alpha values are ignored)"""
+    """
+    Converts a hex string of the form [aa]rrggbb to HLSMAX based HLS values. (alpha values are ignored)
+
+    :param aRGB: A hex string of the form [aa]rrggbb
+    :return: A tuple containing the hue, lightness, and saturation of the color in the range (0, HLSMAX)
+    :raises ValueError: If the color is not a valid aRGB hex value
+    :raises TypeError: If the aRGB arg is not an str
+    """
     if isinstance(aRGB, str):
         m = aRGB_REGEX.match(aRGB)
         if m is None:
@@ -36,7 +43,14 @@ def aRGB_to_ms_hls(aRGB: str) -> tuple[int, int, int]:
 
 
 def aRGB_to_css(aRGB: str) -> str:
-    """Converts a hex string of the form [aa]rrggbb to CSS color string"""
+    """
+    Converts a hex string of the form [aa]rrggbb to CSS color string
+
+    :param aRGB: A hex string of the form [aa]rrggbb
+    :return: A CSS color string representation of the given color
+    :raises ValueError: If the color is not a valid aRGB hex value
+    :raises TypeError: If the aRGB arg is not an str
+    """
     if isinstance(aRGB, str):
         m = aRGB_REGEX.match(aRGB)
         if m is None:
@@ -56,7 +70,14 @@ def aRGB_to_css(aRGB: str) -> str:
 
 
 def rgb_to_ms_hls(red: float, green: float, blue: float) -> tuple[int, int, int]:
-    """Converts rgb values in range (0,1) to HLSMAX based HLS"""
+    """
+    Converts RGB values in the range (0,1) to HLSMAX based HLS values.
+
+    :param red: The red component of the color in the range (0,1)
+    :param green: The green component of the color in the range (0,1)
+    :param blue: The blue component of the color in the range (0,1)
+    :return: A tuple containing the hue, lightness, and saturation of the color in the range (0, HLSMAX)
+    """
     h, l, s = rgb_to_hls(red, green, blue)
     return (int(round(h * HLSMAX)), int(round(l * HLSMAX)), int(round(s * HLSMAX)))
 
@@ -65,9 +86,17 @@ def rgb_to_ms_hls(red: float, green: float, blue: float) -> tuple[int, int, int]
 def ms_hls_to_rgb(
     hue: int, lightness: int, saturation: int
 ) -> tuple[float, float, float]:
-    """Converts HLSMAX based HLS values to rgb values in the range (0,1)"""
+    """
+    Converts HLSMAX based HLS values to RGB values in the range (0,1)
+
+    :param hue: The hue component of the color in the range (0, HLSMAX)
+    :param lightness: The lightness component of the color in the range (0, HLSMAX)
+    :param saturation: The saturation component of the color in the range (0, HLSMAX)
+    :return: A tuple containing the red, green, and blue components of the color in the range (0,1)
+    """
     # if lightness is None:
     #     hue, lightness, saturation = hue
+
     return hls_to_rgb(hue / HLSMAX, lightness / HLSMAX, saturation / HLSMAX)
 
 
@@ -76,7 +105,16 @@ def ms_hls_to_rgb(
 #     if green is None:
 #         red, green, blue = red
 def rgb_to_hex(red: float, green: float, blue: float) -> str:
-    """Converts (0,1) based RGB values to a hex string 'rrggbb'"""
+    """
+    Converts (0,1) based RGB values to a hex string 'rrggbb'
+
+    :param red: The red component of the color in the range (0,1)
+    :param green: The green component of the color in the range (0,1)
+    :param blue: The blue component of the color in the range (0,1)
+    :return: A hex string representation of the given color
+    :raises ValueError: If the color is not a valid RGB hex value
+    :raises TypeError: If the aRGB arg is not an str
+    """
     return (
         "%02x%02x%02x"
         % (
@@ -88,10 +126,24 @@ def rgb_to_hex(red: float, green: float, blue: float) -> str:
 
 
 def tint_luminance(tint: float | None, lum: float) -> int:
-    """Tints a HLSMAX based luminance"""
+
+    """
+    Tints the given luminance (HLSMAX based) value by the given tint value.
+    
+    The tint value is a float value in the range (-1.0, 1.0).
+    If tint is None, the luminance value will be returned as is.
+    
+    :param tint: The tint value to apply to the luminance.
+    :param lum: The luminance value to tint.
+    :return: The tinted luminance value as an integer in the range (0, HLSMAX)
+
+    :seealso: http://ciintelligence.blogspot.co.uk/2012/02/converting-excel-theme-color-and-tint.html
+    """
+
     # See: http://ciintelligence.blogspot.co.uk/2012/02/converting-excel-theme-color-and-tint.html
 
     # int() is not required due to round implementation
+
     return round(
         (
             (lum * (1.0 + tint))

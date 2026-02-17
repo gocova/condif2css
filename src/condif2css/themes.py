@@ -6,9 +6,20 @@ from openpyxl.workbook import Workbook
 
 
 def get_theme_colors(wb: Workbook):
-    """Gets theme colors from the workbook"""
+
+    """
+    Retrieves the colors of a theme from a workbook.
+
+    :param wb: The workbook
+    :return: A list of colors in the theme, in the order of light1, dark1, light2, dark2, accent1, accent2, accent3, accent4, accent5, accent6, hyperlink, followedhyperlink.
+
+    The colors are retrieved from the theme file loaded in the workbook. If a theme file is not loaded, an empty list is returned.
+
+    :seealso: https://groups.google.com/forum/#!topic/openpyxl-users/I0k3TfqNLrc
+    """
 
     # see: https://groups.google.com/forum/#!topic/openpyxl-users/I0k3TfqNLrc
+
     from openpyxl.xml.functions import QName, fromstring
 
     xlmns = "http://schemas.openxmlformats.org/drawingml/2006/main"

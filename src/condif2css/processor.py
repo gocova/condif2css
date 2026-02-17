@@ -1,3 +1,8 @@
+# Copyright (c) 2026 Jose Gonzalo Covarrubias M <gocova.dev@gmail.com>
+#
+# Part of: batch_xlsx2html (bxx2html)
+#
+
 from collections.abc import Iterable
 from mvin import TokenEmpty, TokenString, TokenNumber
 from openpyxl.cell import Cell, MergedCell
@@ -13,20 +18,37 @@ def process(
     fail_ok: bool = True,
 ) -> Dict[str, Tuple[str, str, int, int, bool]]:
     """
-    Returns:
-        Dict[
-            key
-            , Tuple[
-                sheetname
-                cell_ref
-                priority
-                dxf_id
-                stop_if_true
-    """
+    Process a worksheet conditional formatting rules into a dictionary mapping cell references to their corresponding respective conditional formatting styles.
 
+    The resulting dictionary will contain the following information for each cell:
+        - The worksheet title
+        - The cell coordinate
+        - The priority of the conditional formatting rule
+        - The differential style index
+        - A boolean indicating whether the style should be applied if the formula evaluates to True
+
+    :param sheet: The worksheet to process
+    :param fail_ok: If True, then exceptions will be caught and logged. Otherwise, exceptions will be raised.
+
+    :return: A dictionary mapping cell references to their respective conditional formatting styles
+    """
+    
     def get_offsets_for(
         cell_coord: str, row_offset: int, column_offset: int
     ) -> Tuple[int, int]:
+        """
+        Returns the row and column offsets for a cell coordinate based on the presence of $.
+
+        If the cell coordinate starts with $, then the column offset is ignored and set to 0.
+        If the cell coordinate does not start with $, then the column offset is used.
+        If the cell coordinate contains a $ (e.g. A$1), then the row offset is used.
+        If the cell coordinate does not contain a $ (e.g. A1), then the row offset is ignored and set to 0.
+
+        :param cell_coord: The cell coordinate to process
+        :param row_offset: The row offset to use if the cell coordinate contains a $
+        :param column_offset: The column offset to use if the cell coordinate does not start with $
+        :return: A tuple containing the row and column offsets
+        """
         if isinstance(cell_coord, str) and len(cell_coord) >= 2:
             if cell_coord.startswith("$"):
                 offset_col = 0
@@ -134,19 +156,26 @@ def process(
                                                         ref_cell = sheet[ref]
 
                                                         if isinstance(ref_cell, Cell):
-                                                            offset_row, offset_col = (
-                                                                get_offsets_for(
-                                                                    ref,
-                                                                    delta_row,
-                                                                    delta_col,
+                                                            try:
+                                                                offset_row, offset_col = (
+                                                                    get_offsets_for(
+                                                                        ref,
+                                                                        delta_row,
+                                                                        delta_col,
+                                                                    )
                                                                 )
-                                                            )
-                                                            offset_cell = (
-                                                                ref_cell.offset(
-                                                                    row=offset_row,
-                                                                    column=offset_col,
+                                                                offset_cell = (
+                                                                    ref_cell.offset(
+                                                                        row=offset_row,
+                                                                        column=offset_col,
+                                                                    )
                                                                 )
-                                                            )
+                                                            except Exception as exc:
+                                                                logging.error(
+                                                                    f"process: Exception while getting offset for reference '{ref}' -> {str(exc)}"
+                                                                )
+                                                                should_apply_func = False
+                                                                break
                                                             if isinstance(
                                                                 offset_cell,
                                                                 Cell | MergedCell,

@@ -1,3 +1,8 @@
+# Copyright (c) 2026 Jose Gonzalo Covarrubias M <gocova.dev@gmail.com>
+#
+# Part of: batch_xlsx2html (bxx2html)
+#
+
 import logging
 import blake3
 from typing import Any, Callable, Dict, Iterable, List, Set, Tuple, Literal
@@ -48,19 +53,56 @@ BORDER_STYLES = {
 
 class CssBuilder:
     def __init__(self, get_css_color: Callable[[Color], str | None]) -> None:
+        """
+        Initializes a CssBuilder instance.
+
+        Args:
+            get_css_color (Callable[[Color], str | None]): A function that takes
+                a Color and returns its CSS representation as a string, or None.
+        """
         self.get_css_color = get_css_color
 
     def font_size(self, size: int, is_important: bool = False) -> Tuple[str, str]:
+        """
+        Returns a tuple containing the CSS property "font-size" and its value.
+
+        Args:
+            size (int): The font size in pixels.
+            is_important (bool, optional): Whether to include "!important" in the CSS declaration. Defaults to False.
+
+        Returns:
+            Tuple[str, str]: A tuple containing the CSS property "font-size" and its value.
+        """
         is_important_label = " !important" if is_important else ""
         return "font-size", f"{size}px{is_important_label}"
 
     def height(self, size: int, is_important: bool = False) -> Tuple[str, str]:
+        """
+        Returns a tuple containing the CSS property "height" and its value.
+
+        Args:
+            size (int): The height in pixels.
+            is_important (bool, optional): Whether to include "!important" in the CSS declaration. Defaults to False.
+
+        Returns:
+            Tuple[str, str]: A tuple containing the CSS property "height" and its value.
+        """
         is_important_label = " !important" if is_important else ""
         return "height", f"{size}px{is_important_label}"
 
     def font_color(
         self, color: Color, is_important: bool = False
     ) -> Tuple[str, str] | None:
+        """
+        Returns a tuple containing the CSS property "color" and its value.
+
+        Args:
+            color (Color): The color to use.
+            is_important (bool, optional): Whether to include "!important" in the CSS declaration. Defaults to False.
+
+        Returns:
+            Tuple[str, str] | None: A tuple containing the CSS property "color" and its value, or None if the color is invalid.
+        """
         css_color = self.get_css_color(color)
         if css_color is None:
             return None
@@ -70,6 +112,16 @@ class CssBuilder:
     def background_color(
         self, color: Color, is_important: bool = False
     ) -> Tuple[str, str] | None:
+        """
+        Returns a tuple containing the CSS property "background-color" and its value.
+
+        Args:
+            color (Color): The color to use.
+            is_important (bool, optional): Whether to include "!important" in the CSS declaration. Defaults to False.
+
+        Returns:
+            Tuple[str, str] | None: A tuple containing the CSS property "background-color" and its value, or None if the color is invalid.
+        """
         css_color = self.get_css_color(color)
         if css_color is None:
             return None
@@ -115,6 +167,18 @@ class CssBuilder:
         color: Color,
         is_important: bool = False,
     ) -> List[Tuple[str, str]] | None:
+        """
+        Returns a list of tuples containing the CSS property "border-{direction}" and its value, for the given style, direction and color.
+
+        Args:
+            style (str | None): The border style.
+            direction (Literal["right", "left", "top", "bottom"]): The direction of the border.
+            color (Color): The color of the border.
+            is_important (bool, optional): Whether to include "!important" in the CSS declaration. Defaults to False.
+
+        Returns:
+            List[Tuple[str, str]] | None: A list of tuples containing the CSS property "border-{direction}" and its value, or None if the style is invalid.
+        """
         if style is None:
             return None
 
@@ -138,6 +202,24 @@ class CssBuilder:
 
 class CssRulesRegistry:
     def __init__(self, prefix: str = "xx2h", digest_size: int = 28) -> None:
+        """
+        Initializes a CssRulesRegistry instance.
+
+        Args:
+            prefix (str, optional): The prefix to use for generating classnames. Defaults to "xx2h".
+            digest_size (int, optional): The size of the hash to generate for each rule. Defaults to 28.
+
+        The CssRulesRegistry instance will store a mapping of hash values to their corresponding CSS rules, as well as the classnames and the source items for each rule.
+
+        The instance will be initialized with an empty mapping of hash values to rules, and an empty list of classnames.
+
+        The digest size is used to generate a stable hash for each rule, and can be adjusted to trade off between hash quality and performance.
+
+        :param prefix: The prefix to use for generating classnames.
+        :param digest_size: The size of the hash to generate for each rule.
+        :type prefix: str
+        :type digest_size: int
+        """
         self._prefix = prefix
         # self._rules: List[str] = []
         # self._rules_source: List[Dict[str, str]] = []
@@ -154,6 +236,26 @@ class CssRulesRegistry:
         self._digest_size = digest_size
 
     def register(self, items: Iterable) -> str:
+        """
+        Registers a new CSS rule based on the given items.
+
+        The items will be sorted to ensure consistent rule generation and hashing.
+        The CSS rule string will be built by joining the items with a colon and a newline.
+        A stable hash will be generated for the rule using the blake3 algorithm.
+        If a rule with the same hash already exists, the existing classname will be returned.
+        Otherwise, a new classname will be generated and the rule will be registered.
+
+        Parameters
+        ----------
+        items : Iterable
+            A collection of key-value pairs to build the CSS rule from.
+
+        Returns
+        -------
+        str
+            The classname associated with the registered CSS rule.
+        """
+
         # Sort the input to ensure consistent rule generation and hashing
         sorted_items = sorted(items)
 
@@ -191,6 +293,17 @@ def get_border_styles_from_cell(
     css_builder: CssBuilder,
     is_important: bool = False,
 ) -> List[Tuple[str, str]]:
+    """
+    Returns a list of tuples, where each tuple contains a CSS property and its value, representing the border styles of a cell.
+
+    Args:
+        cell (Cell | MergedCell | DifferentialStyle): The cell from which to extract the border styles.
+        css_builder (CssBuilder): The builder used to construct the CSS rules.
+        is_important (bool, optional): Whether to include "!important" in the CSS declaration. Defaults to False.
+
+    Returns:
+        List[Tuple[str, str]]: A list of tuples, where each tuple contains a CSS property and its value, representing the border styles of the cell.
+    """
     border_styles = []
 
     cell_border = getattr(cell, "border")
@@ -215,11 +328,52 @@ def get_border_styles_from_cell(
 
 
 def create_get_css_from_cell(css_registry: CssRulesRegistry, css_builder: CssBuilder):
+    """
+    Creates a function that returns a set of CSS classes representing the styles of a cell.
+
+    The returned function takes a cell, a map of merged cells, and a boolean indicating whether
+    the styles should be marked as important.
+
+    The function will return a set of CSS classes, each representing a CSS rule or ruleset.
+    The CSS classes will be registered in the provided CssRulesRegistry.
+
+    The function will extract the following styles from the cell:
+
+    - Border styles
+    - Alignment (horizontal and vertical)
+    - Fill color (if the cell has a solid fill pattern)
+    - Font styles (font size, color, bold, italic, underline)
+
+    :param css_registry: The registry in which the CSS classes will be registered
+    :param css_builder: The builder used to construct the CSS rules
+    :return: A function that takes a cell, a map of merged cells, and a boolean indicating whether the styles should be marked as important, and returns a set of CSS classes
+    """
     def get_css_from_cell(
         cell: Cell | MergedCell | DifferentialStyle,
         merged_cell_map=None,
         is_important: bool = False,
     ) -> Set[str]:
+        """
+        Returns a set of CSS classes representing the styles of a cell.
+
+        The returned function takes a cell, a map of merged cells, and a boolean indicating whether
+        the styles should be marked as important.
+
+        The function will return a set of CSS classes, each representing a CSS rule or ruleset.
+        The CSS classes will be registered in the provided CssRulesRegistry.
+
+        The function will extract the following styles from the cell:
+
+        - Border styles
+        - Alignment (horizontal and vertical)
+        - Fill color (if the cell has a solid fill pattern)
+        - Font styles (font size, color, bold, italic, underline)
+
+        :param cell: The cell from which to extract the styles
+        :param merged_cell_map: A map of merged cells, for which the styles will also be extracted
+        :param is_important: A boolean indicating whether the styles should be marked as important
+        :return: A set of CSS classes representing the styles of the cell
+        """
         nonlocal css_builder
 
         # print(cell)

@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Jose Gonzalo Covarrubias M <gocova.dev@gmail.com>
+# Copyright (c) 2026 Jose Gonzalo Covarrubias M <gocova.dev@gmail.com>
 #
 # Part of: batch_xlsx2html (bxx2html)
 #

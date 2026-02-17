@@ -1,8 +1,9 @@
-# Copyright (c) 2025 Jose Gonzalo Covarrubias M <gocova.dev@gmail.com>
+# Copyright (c) 2026 Jose Gonzalo Covarrubias M <gocova.dev@gmail.com>
 #
 # Part of: batch_xlsx2html (bxx2html)
 #
-# Aknowledge:
+#
+# Acknowledge:
 #   - Inspiration from xlsx2html, extended with theme support and aRGB colors
 
 from openpyxl.styles.colors import COLOR_INDEX, Color, aRGB_REGEX
@@ -15,7 +16,16 @@ from .color import (
 
 
 def create_themed_get_css_color(theme_aRGBs_list: list[str]):
-    """Create a get_css_color based on provided theme"""
+    """
+    Creates a function that returns the CSS color string representation of the given color.
+
+    If the color is a theme color, it will be resolved to its corresponding RGB value.
+    If the color is an indexed color, it will be resolved to its corresponding RGB value.
+    If the color is an RGB color, it will be returned as is.
+
+    :param theme_aRGBs_list: A list of aRGB values for the theme colors.
+    :return: A function that takes a Color and returns its CSS color string representation, or None if the color is not valid
+    """
     if theme_aRGBs_list is None or (
         isinstance(theme_aRGBs_list, list) and len(theme_aRGBs_list) < 2
     ):
@@ -23,6 +33,16 @@ def create_themed_get_css_color(theme_aRGBs_list: list[str]):
     theme_len = len(theme_aRGBs_list)
 
     def cova__get_css_color(color: Color):
+        """
+        Returns the CSS color string representation of the given color.
+
+        If the color is a theme color, it will be resolved to its corresponding RGB value.
+        If the color is an indexed color, it will be resolved to its corresponding RGB value.
+        If the color is an RGB color, it will be returned as is.
+
+        :param color: The color to be resolved
+        :return: The CSS color string representation of the given color, or None if the color is not valid
+        """
         rgb = None
 
         if color.type == "theme":
