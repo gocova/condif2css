@@ -6,7 +6,7 @@ import pytest
 from openpyxl import Workbook
 from openpyxl.writer.theme import theme_xml
 
-from condif2css.themes import get_theme_colors
+from condif2css.themes import ThemeColorsError, get_theme_colors
 
 
 def test_get_theme_colors_from_openpyxl_theme_xml():
@@ -21,8 +21,21 @@ def test_get_theme_colors_from_openpyxl_theme_xml():
     assert colors[-1] == "800080"
 
 
-def test_get_theme_colors_raises_without_loaded_theme():
+def test_get_theme_colors_returns_empty_without_loaded_theme_by_default():
     wb = Workbook()
-    with pytest.raises(ValueError):
-        get_theme_colors(wb)
+    assert get_theme_colors(wb, strict=False) == []
 
+
+def test_get_theme_colors_raises_custom_exception_when_strict():
+    wb = Workbook()
+    with pytest.raises(ThemeColorsError):
+        get_theme_colors(wb, strict=True)
+
+
+def test_get_theme_colors_invalid_theme_returns_empty_or_raises():
+    wb = Workbook()
+    wb.loaded_theme = "<not valid xml>"
+
+    assert get_theme_colors(wb, strict=False) == []
+    with pytest.raises(ThemeColorsError):
+        get_theme_colors(wb, strict=True)

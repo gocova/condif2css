@@ -42,7 +42,7 @@ BORDER_STYLES = {
     "slantDashDot": None,
     "thick": [
         ("border-{direction}-style", "solid"),
-        ("border-{direction}-width", "1px;"),
+        ("border-{direction}-width", "1px"),
     ],
     "thin": [
         ("border-{direction}-style", "solid"),
@@ -134,7 +134,7 @@ class CssBuilder:
 
     def font_underline(self, is_important: bool = False) -> Tuple[str, str]:
         is_important_label = " !important" if is_important else ""
-        return "font-decoration", f"underline{is_important_label}"
+        return "text-decoration", f"underline{is_important_label}"
 
     def font_bold(self, is_important: bool = False) -> Tuple[str, str]:
         is_important_label = " !important" if is_important else ""

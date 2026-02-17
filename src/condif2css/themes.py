@@ -5,15 +5,18 @@
 from openpyxl.workbook import Workbook
 
 
-def get_theme_colors(wb: Workbook):
+class ThemeColorsError(Exception):
+    """Raised when workbook theme colors cannot be extracted."""
+
+
+def get_theme_colors(wb: Workbook, strict: bool = True) -> list[str]:
 
     """
     Retrieves the colors of a theme from a workbook.
 
     :param wb: The workbook
+    :param strict: If True, raise ThemeColorsError on parsing/structure errors. If False, return an empty list.
     :return: A list of colors in the theme, in the order of light1, dark1, light2, dark2, accent1, accent2, accent3, accent4, accent5, accent6, hyperlink, followedhyperlink.
-
-    The colors are retrieved from the theme file loaded in the workbook. If a theme file is not loaded, an empty list is returned.
 
     :seealso: https://groups.google.com/forum/#!topic/openpyxl-users/I0k3TfqNLrc
     """
@@ -22,33 +25,63 @@ def get_theme_colors(wb: Workbook):
 
     from openpyxl.xml.functions import QName, fromstring
 
-    xlmns = "http://schemas.openxmlformats.org/drawingml/2006/main"
-    root = fromstring(wb.loaded_theme)
-    themeEl = root.find(QName(xlmns, "themeElements").text)
-    colorSchemes = themeEl.findall(QName(xlmns, "clrScheme").text)
-    firstColorScheme = colorSchemes[0]
+    try:
+        xlmns = "http://schemas.openxmlformats.org/drawingml/2006/main"
+        root = fromstring(wb.loaded_theme)
+        themeEl = root.find(QName(xlmns, "themeElements").text)
+        if themeEl is None:
+            raise ThemeColorsError("Missing 'themeElements' node in workbook theme.")
 
-    colors = []
+        colorSchemes = themeEl.findall(QName(xlmns, "clrScheme").text)
+        if len(colorSchemes) == 0:
+            raise ThemeColorsError("Missing 'clrScheme' node in workbook theme.")
+        firstColorScheme = colorSchemes[0]
 
-    for c in [
-        "lt1",
-        "dk1",
-        "lt2",
-        "dk2",
-        "accent1",
-        "accent2",
-        "accent3",
-        "accent4",
-        "accent5",
-        "accent6",
-        "hlink",
-        "folHlink",
-    ]:
-        accent = firstColorScheme.find(QName(xlmns, c).text)
+        colors = []
 
-        if "window" in accent.getchildren()[0].attrib["val"]:
-            colors.append(accent.getchildren()[0].attrib["lastClr"])
-        else:
-            colors.append(accent.getchildren()[0].attrib["val"])
+        for c in [
+            "lt1",
+            "dk1",
+            "lt2",
+            "dk2",
+            "accent1",
+            "accent2",
+            "accent3",
+            "accent4",
+            "accent5",
+            "accent6",
+            "hlink",
+            "folHlink",
+        ]:
+            accent = firstColorScheme.find(QName(xlmns, c).text)
+            if accent is None:
+                raise ThemeColorsError(f"Missing '{c}' color node in workbook theme.")
 
-    return colors
+            accent_values = accent.getchildren()
+            if len(accent_values) == 0:
+                raise ThemeColorsError(f"Color node '{c}' does not contain values.")
+            accent_value = accent_values[0].attrib
+            val = accent_value.get("val")
+            if val is None:
+                raise ThemeColorsError(f"Color node '{c}' is missing 'val' attribute.")
+            if "window" in val:
+                last_clr = accent_value.get("lastClr")
+                if last_clr is None:
+                    raise ThemeColorsError(
+                        f"Color node '{c}' is missing 'lastClr' attribute."
+                    )
+                colors.append(last_clr)
+            else:
+                colors.append(val)
+
+        return colors
+    except ThemeColorsError:
+        if strict:
+            raise
+        return []
+    except Exception as exc:
+        if strict:
+            raise ThemeColorsError(
+                "Unable to parse workbook theme colors."
+            ) from exc
+        return []

@@ -30,7 +30,7 @@ def test_css_builder_basic_methods():
     assert builder.font_size(12) == ("font-size", "12px")
     assert builder.height(10, is_important=True) == ("height", "10px !important")
     assert builder.background_transparent() == ("background-color", "transparent")
-    assert builder.font_underline() == ("font-decoration", "underline")
+    assert builder.font_underline() == ("text-decoration", "underline")
     assert builder.font_bold(is_important=True) == ("font-weight", "bold !important")
     assert builder.font_italic() == ("font-style", "italic")
 
@@ -62,6 +62,11 @@ def test_css_builder_color_and_border_paths():
     assert ("border-top-style", "solid !important") in unknown
     assert ("border-top-width", "1px !important") in unknown
     assert ("border-top-color", "#AABBCC !important") in unknown
+    assert all(v != "1px; !important" for _, v in unknown)
+
+    thick = builder.border("thick", "bottom", color)
+    assert ("border-bottom-style", "solid") in thick
+    assert ("border-bottom-width", "1px") in thick
 
     builder_no_color = CssBuilder(lambda _: None)
     no_color_border = builder_no_color.border("thin", "right", color)
@@ -143,7 +148,7 @@ def test_create_get_css_from_cell_for_regular_cell_and_merged_cells():
     assert "color: #DDCCBB !important;" in css_text
     assert "font-weight: bold !important;" in css_text
     assert "font-style: italic !important;" in css_text
-    assert "font-decoration: underline !important;" in css_text
+    assert "text-decoration: underline !important;" in css_text
     assert "border-top-style: solid !important;" in css_text
     assert "border-left-style: double !important;" in css_text
 
@@ -177,6 +182,6 @@ def test_create_get_css_from_cell_differential_style_and_non_solid_warning(caplo
     assert "color: #010203;" in css_text
     assert "font-weight: bold;" in css_text
     assert "font-style: italic;" in css_text
-    assert "font-decoration: underline;" in css_text
+    assert "text-decoration: underline;" in css_text
     assert "border-bottom-style: dashed;" in css_text
     assert "border-bottom-width: 2px;" in css_text

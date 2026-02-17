@@ -50,10 +50,16 @@ uv sync --group dev
 ```python
 from openpyxl import load_workbook
 
-from condif2css import create_themed_css_color_resolver, get_theme_colors
-from condif2css.color import argb_to_css
-from condif2css.css import CssBuilder, CssRulesRegistry, create_get_css_from_cell
-from condif2css.processor import process_conditional_formatting
+from condif2css import (
+    CssBuilder,
+    CssRulesRegistry,
+    argb_to_css,
+    create_get_css_from_cell,
+    create_themed_css_color_resolver,
+    get_differential_style,
+    get_theme_colors,
+    process_conditional_formatting,
+)
 
 wb = load_workbook("input.xlsx", data_only=True)
 ws = wb["Sheet1"]
@@ -75,7 +81,9 @@ matched_rules = process_conditional_formatting(ws)
 # Apply each matched differential style and collect class names per cell
 cell_classes = {}
 for code, (_, _, _, dxf_id, _) in matched_rules.items():
-    dxf = wb._differential_styles[dxf_id]  # openpyxl differential style
+    dxf = get_differential_style(wb, dxf_id)
+    if dxf is None:
+        continue
     cell_classes[code] = sorted(get_css_from_cell(dxf, is_important=True))
 
 # Final CSS text
@@ -85,11 +93,13 @@ css_text = "\n".join(css_registry.get_rules())
 ## Public API (Current)
 
 - `condif2css.create_themed_css_color_resolver(theme_colors)`
-- `condif2css.get_theme_colors(workbook)`
-- `condif2css.processor.process_conditional_formatting(sheet, fail_ok=True)`
-- `condif2css.css.CssBuilder`
-- `condif2css.css.CssRulesRegistry`
-- `condif2css.css.create_get_css_from_cell(...)`
+- `condif2css.get_theme_colors(workbook, strict=False)`
+- `condif2css.process_conditional_formatting(sheet, fail_ok=True)`
+- `condif2css.get_differential_style(workbook, dxf_id)`
+- `condif2css.ThemeColorsError`
+- `condif2css.CssBuilder`
+- `condif2css.CssRulesRegistry`
+- `condif2css.create_get_css_from_cell(...)`
 - `condif2css.color.argb_to_css(...)` and color/tint utility helpers
 
 ## Current Scope and Limitations
@@ -125,4 +135,3 @@ Licensed under either of:
 - MIT license ([`LICENSE_MIT`](LICENSE_MIT) or <https://opensource.org/licenses/MIT>)
 
 at your option.
-

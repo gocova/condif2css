@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Jose Gonzalo Covarrubias
+# SPDX-FileCopyrightText: 2026 Jose Gonzalo Covarrubias
 [project]
 name = "condif2css"
 authors = [
@@ -12,7 +12,7 @@ dynamic = ["version"]
 dependencies = [
     "blake3>=1.0.4",
     "lxml>=5.3.0",
-    "mvin==0.12.0b1",
+    "mvin==0.13.0b6021601",
     "openpyxl>=3.1.5",
 ]
 requires-python = ">=3.10,<4.0"

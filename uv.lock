@@ -99,7 +99,7 @@ dev = [
 requires-dist = [
     { name = "blake3", specifier = ">=1.0.4" },
     { name = "lxml", specifier = ">=5.3.0" },
-    { name = "mvin", specifier = "==0.12.0b1" },
+    { name = "mvin", specifier = "==0.13.0b6021601" },
     { name = "openpyxl", specifier = ">=3.1.5" },
 ]
 
@@ -284,11 +284,11 @@ wheels = [
 
 [[package]]
 name = "mvin"
-version = "0.12.0b1"
+version = "0.13.0b6021601"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/44/8f/3224f9579d014d487dee68804c6190bacdbe9bc70e6f1650af033b45a26a/mvin-0.12.0b1.tar.gz", hash = "sha256:4b7272ee59b0630338bbd26ae300d6ed87898d86de09f561b3982bfc8d2263eb", size = 20318 }
+sdist = { url = "https://files.pythonhosted.org/packages/98/00/766479cf4d1786f40e09eb1158b941f97c034cffc07553d8750ec2bbf0fa/mvin-0.13.0b6021601.tar.gz", hash = "sha256:c8b3f9d7586678a5d07a612f674997fbb09e08e12220f503b1704bb04ee07126", size = 20848 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1b/da/b1c78711c5002c8ec9f00ec3d060e4c9200afcb0053783859bf8a8c6ad39/mvin-0.12.0b1-py3-none-any.whl", hash = "sha256:f22258adee62a78c449c4f5d9a42aab05aa7d06837fccbad2026ae62c0488c78", size = 16740 },
+    { url = "https://files.pythonhosted.org/packages/af/6a/dd9d1cbd7773e01fef51e57aa0a4526b30254630b935b1a249d18cfa156c/mvin-0.13.0b6021601-py3-none-any.whl", hash = "sha256:342f24bea1218fc9fd684a5bd4d295fd0b4a79ba4d7bce258065768f9e592f13", size = 17000 },
 ]
 
 [[package]]
