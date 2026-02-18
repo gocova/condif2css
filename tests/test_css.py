@@ -1,7 +1,3 @@
-import sys
-
-sys.path.append("src")
-
 import logging
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Color, Font, PatternFill, Side
@@ -66,12 +62,16 @@ def test_css_builder_color_and_border_paths():
 
     thick = builder.border("thick", "bottom", color)
     assert ("border-bottom-style", "solid") in thick
-    assert ("border-bottom-width", "1px") in thick
+    assert ("border-bottom-width", "3px") in thick
 
     builder_no_color = CssBuilder(lambda _: None)
     no_color_border = builder_no_color.border("thin", "right", color)
     assert all(not k.endswith("-color") for k, _ in no_color_border)
     assert ("border-right-style", "solid") in no_color_border
+    assert builder.border("thin", "right", None) == [
+        ("border-right-style", "solid"),
+        ("border-right-width", "1px"),
+    ]
 
     assert builder_no_color.font_color(color) is None
     assert builder_no_color.background_color(color) is None
@@ -153,6 +153,18 @@ def test_create_get_css_from_cell_for_regular_cell_and_merged_cells():
     assert "border-left-style: double !important;" in css_text
 
 
+def test_create_get_css_from_cell_handles_missing_merged_cells_key():
+    wb = Workbook()
+    ws = wb.active
+    ws["A1"].border = Border(top=Side(style="thin", color=Color(rgb="00AA0000")))
+    registry = CssRulesRegistry(prefix="cf")
+    builder = CssBuilder(_get_css_color)
+    get_css = create_get_css_from_cell(registry, builder)
+
+    classes = get_css(ws["A1"], merged_cell_map={"unknown": []})
+    assert classes
+
+
 def test_create_get_css_from_cell_differential_style_and_non_solid_warning(caplog):
     wb = Workbook()
     ws = wb.active
@@ -164,7 +176,7 @@ def test_create_get_css_from_cell_differential_style_and_non_solid_warning(caplo
 
     with caplog.at_level(logging.WARNING):
         get_css(ws["C1"])
-    assert any("Pattern type is not supported" in r.message for r in caplog.records)
+    assert any("Pattern type is approximated as flat color" in r.message for r in caplog.records)
 
     dxf = DifferentialStyle(
         fill=PatternFill(bgColor=Color(rgb="00ABCDEF")),
@@ -185,3 +197,16 @@ def test_create_get_css_from_cell_differential_style_and_non_solid_warning(caplo
     assert "text-decoration: underline;" in css_text
     assert "border-bottom-style: dashed;" in css_text
     assert "border-bottom-width: 2px;" in css_text
+
+
+def test_create_get_css_from_cell_differential_fill_prefers_fgcolor():
+    dxf = DifferentialStyle(
+        fill=PatternFill(patternType="solid", fgColor=Color(rgb="00BBCCDD"), bgColor=Color(rgb="00000000"))
+    )
+    registry = CssRulesRegistry(prefix="cf")
+    builder = CssBuilder(_get_css_color)
+    get_css = create_get_css_from_cell(registry, builder)
+
+    get_css(dxf)
+    css_text = "\n".join(registry.get_rules())
+    assert "background-color: #BBCCDD;" in css_text

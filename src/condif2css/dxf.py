@@ -3,6 +3,7 @@
 # Part of: batch_xlsx2html (bxx2html)
 #
 
+from collections.abc import Sequence
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.workbook import Workbook
 
@@ -22,7 +23,7 @@ def get_differential_style(workbook: Workbook, dxf_id: int) -> DifferentialStyle
         return None
 
     styles = getattr(differential_styles, "styles", None)
-    if not isinstance(styles, list):
+    if not isinstance(styles, Sequence):
         return None
 
     if dxf_id >= len(styles):

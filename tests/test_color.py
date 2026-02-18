@@ -1,14 +1,13 @@
-import sys
-sys.path.append('src')
-
 from condif2css.color import argb_to_css, ms_hls_to_rgb, rgb_to_hex, rgb_to_ms_hls, tint_luminance, argb_to_ms_hls
 import pytest
+from mvin import TokenBool
+import condif2css.processor as processor
 
 def test_to_css_rgb():
     assert argb_to_css('AABBDD') == '#AABBDD'
 
 def test_to_css_rgba():
-    assert argb_to_css('AAAABBDD') == 'rgba(170, 187, 221, 170)'
+    assert argb_to_css('AAAABBDD') == 'rgba(170, 187, 221, 0.667)'
 
 def test_to_css_rgba_zero_alpha():
     assert argb_to_css('00AABBDD') == '#AABBDD'
@@ -24,6 +23,9 @@ def test_to_css_no_str_arg():
 def test_to_css_no_args():
     with pytest.raises(TypeError):
         argb_to_css() # type: ignore
+
+def test_to_token_bool_is_boolean_token():
+    assert isinstance(processor._to_token(True), TokenBool)
 
 def test_rgb_to_hex():
     assert rgb_to_hex(1.0,0.5,0.0) == 'FF8000'

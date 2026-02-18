@@ -2,6 +2,7 @@
 #
 # Part of: batch_xlsx2html (bxx2html)
 #
+from importlib.metadata import PackageNotFoundError, version
 
 from .color import (
     argb_to_css,
@@ -22,7 +23,10 @@ from .dxf import get_differential_style
 from .processor import process_conditional_formatting
 from .themes import ThemeColorsError, get_theme_colors
 
-__version__ = "0.13.0b6021601"
+try:
+    __version__ = version("condif2css")
+except PackageNotFoundError:
+    __version__ = "0.0.0.dev0"
 
 __all__ = [
     "__version__",

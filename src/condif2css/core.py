@@ -15,7 +15,7 @@ from .color import (
 )
 
 
-def create_themed_css_color_resolver(theme_argbs_list: list[str]):
+def create_themed_css_color_resolver(theme_argbs_list: list[str] | None):
     """
     Creates a function that returns the CSS color string representation of the given color.
 
@@ -32,7 +32,7 @@ def create_themed_css_color_resolver(theme_argbs_list: list[str]):
         theme_argbs_list = ["FFFFFF", "000000"]
     theme_len = len(theme_argbs_list)
 
-    def get_css_color(color: Color):
+    def get_css_color(color: Color | None):
         """
         Returns the CSS color string representation of the given color.
 
@@ -43,6 +43,9 @@ def create_themed_css_color_resolver(theme_argbs_list: list[str]):
         :param color: The color to be resolved
         :return: The CSS color string representation of the given color, or None if the color is not valid
         """
+        if color is None or not isinstance(color, Color):
+            return None
+
         rgb = None
 
         if color.type == "theme":
@@ -52,6 +55,8 @@ def create_themed_css_color_resolver(theme_argbs_list: list[str]):
                 and color.value < theme_len
             ):
                 rgb_base: str = theme_argbs_list[color.value]
+                if len(rgb_base) > 6:
+                    rgb_base = rgb_base[-6:]
                 if color.tint == 0.0:
                     rgb = f"00{rgb_base}"
                 else:
@@ -66,7 +71,7 @@ def create_themed_css_color_resolver(theme_argbs_list: list[str]):
 
         if color.type == "indexed":
             # Reference: https://openpyxl.readthedocs.io/en/stable/styles.html#indexed-colours
-            if color.indexed > 0:
+            if isinstance(color.indexed, int) and color.indexed >= 0:
                 if color.indexed < 64:
                     rgb = COLOR_INDEX[color.indexed]
 
@@ -77,8 +82,10 @@ def create_themed_css_color_resolver(theme_argbs_list: list[str]):
                     rgb = theme_argbs_list[1]  # 'dk1' | windowText
                 elif color.indexed == 65:
                     rgb = theme_argbs_list[0]  # 'lt1' | window
-            rgb = "00000000" if not rgb or not aRGB_REGEX.match(rgb) else rgb
+            rgb = "00000000" if not rgb else rgb
 
-        return rgb if isinstance(rgb, str) else None
+        if not isinstance(rgb, str):
+            return None
+        return rgb if aRGB_REGEX.match(rgb) else "00000000"
 
     return get_css_color

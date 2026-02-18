@@ -1,7 +1,3 @@
-import sys
-
-sys.path.append("src")
-
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
 from openpyxl.styles.differential import DifferentialStyle
@@ -39,3 +35,11 @@ def test_get_differential_style_safe_lookup():
         pass
 
     assert lib.get_differential_style(DummyWorkbook(), 0) is None  # type: ignore[arg-type]
+
+    class BadStylesWorkbook:
+        class _Container:
+            styles = (style,)
+
+        _differential_styles = _Container()
+
+    assert lib.get_differential_style(BadStylesWorkbook(), 0) is style  # type: ignore[arg-type]

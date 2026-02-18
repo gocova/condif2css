@@ -1,12 +1,8 @@
-import sys
-
-sys.path.append("src")
-
 from types import SimpleNamespace
 
 import pytest
 from openpyxl import Workbook
-from openpyxl.formatting.rule import FormulaRule
+from openpyxl.formatting.rule import CellIsRule, FormulaRule, Rule
 from openpyxl.styles import PatternFill
 
 import condif2css.processor as processor
@@ -15,6 +11,14 @@ import condif2css.processor as processor
 def _make_rule(formulas, dxf_id, priority, stop_if_true=None):
     fill = PatternFill(patternType="solid", fgColor="00FF0000")
     rule = FormulaRule(formula=formulas, fill=fill, stopIfTrue=stop_if_true)
+    rule.dxfId = dxf_id
+    rule.priority = priority
+    return rule
+
+
+def _make_cellis_rule(operator, formulas, dxf_id, priority, stop_if_true=None):
+    fill = PatternFill(patternType="solid", fgColor="00FF0000")
+    rule = CellIsRule(operator=operator, formula=formulas, fill=fill, stopIfTrue=stop_if_true)
     rule.dxfId = dxf_id
     rule.priority = priority
     return rule
@@ -77,6 +81,25 @@ def test_process_skips_rules_without_dxf_or_with_multiple_formulas():
     assert processor.process_conditional_formatting(ws) == {}
 
 
+def test_process_respects_stop_if_true_even_without_dxf():
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Sheet1"
+    ws["A1"] = "Yes"
+
+    ws.conditional_formatting.add(
+        "A1",
+        _make_rule(['A1="Yes"'], dxf_id=None, priority=1, stop_if_true=True),
+    )
+    ws.conditional_formatting.add(
+        "A1",
+        _make_rule(['A1="Yes"'], dxf_id=9, priority=2, stop_if_true=False),
+    )
+
+    # First rule matches and stops evaluation, so no style should be selected.
+    assert processor.process_conditional_formatting(ws) == {}
+
+
 def test_process_can_raise_when_fail_ok_is_false(monkeypatch):
     class ExplodingFormula:
         inputs = set()
@@ -95,6 +118,22 @@ def test_process_can_raise_when_fail_ok_is_false(monkeypatch):
         processor.process_conditional_formatting(ws, fail_ok=False)
 
     assert processor.process_conditional_formatting(ws, fail_ok=True) == {}
+
+
+def test_process_handles_formula_compile_errors_with_fail_ok_flag(monkeypatch):
+    def boom_get_interpreter(_items):
+        raise SyntaxError("unsupported expression")
+
+    monkeypatch.setattr(processor, "get_interpreter", boom_get_interpreter)
+
+    wb = Workbook()
+    ws = wb.active
+    ws["A1"] = "X"
+    ws.conditional_formatting.add("A1", _make_rule(['A1="X"'], dxf_id=1, priority=1))
+
+    assert processor.process_conditional_formatting(ws, fail_ok=True) == {}
+    with pytest.raises(SyntaxError, match="unsupported expression"):
+        processor.process_conditional_formatting(ws, fail_ok=False)
 
 
 def test_process_returns_empty_when_conditional_formatting_is_missing():
@@ -286,5 +325,46 @@ def test_to_token_and_build_ref_values_non_set_inputs():
     wb = Workbook()
     ws = wb.active
     ref_values, can_apply = processor._build_ref_values(ws, ["A1"], 0, 0)
-    assert ref_values == {}
+    assert "A1" in ref_values
     assert can_apply is True
+
+
+def test_build_ref_values_accepts_iterable_inputs():
+    wb = Workbook()
+    ws = wb.active
+    ws["A1"] = 9
+    ref_values, can_apply = processor._build_ref_values(ws, ("A1",), 0, 0)
+    assert can_apply is True
+    assert "A1" in ref_values
+
+
+def test_process_cellis_rule_with_reference_operand():
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Sheet1"
+    ws["A1"] = 5
+    ws["A2"] = 10
+    ws["B1"] = 5
+    ws["B2"] = 3
+
+    ws.conditional_formatting.add(
+        "A1:A2",
+        _make_cellis_rule("greaterThan", ["B1"], dxf_id=6, priority=1),
+    )
+
+    result = processor.process_conditional_formatting(ws)
+    assert result == {"Sheet1\\!A2": ("Sheet1", "A2", 1, 6, False)}
+
+
+def test_process_contains_text_rule():
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Sheet1"
+    ws["A1"] = "Invoice 2026"
+    ws["A2"] = "Quote"
+
+    rule = Rule(type="containsText", operator="containsText", text="invoice", dxfId=4, priority=1)
+    ws.conditional_formatting.add("A1:A2", rule)
+
+    result = processor.process_conditional_formatting(ws)
+    assert result == {"Sheet1\\!A1": ("Sheet1", "A1", 1, 4, False)}

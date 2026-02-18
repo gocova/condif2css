@@ -17,12 +17,15 @@ DEFAULT_BORDER_STYLE = [
 ]
 
 BORDER_STYLES = {
-    "dashDot": None,
-    "dashDotDot": None,
+    "dashDot": [("border-{direction}-style", "dashed")],
+    "dashDotDot": [("border-{direction}-style", "dashed")],
     "dashed": [("border-{direction}-style", "dashed")],
     "dotted": [("border-{direction}-style", "dotted")],
     "double": [("border-{direction}-style", "double")],
-    "hair": None,
+    "hair": [
+        ("border-{direction}-style", "solid"),
+        ("border-{direction}-width", "1px"),
+    ],
     "medium": [
         ("border-{direction}-style", "solid"),
         ("border-{direction}-width", "2px"),
@@ -39,10 +42,10 @@ BORDER_STYLES = {
         ("border-{direction}-style", "dashed"),
         ("border-{direction}-width", "2px"),
     ],
-    "slantDashDot": None,
+    "slantDashDot": [("border-{direction}-style", "dashed")],
     "thick": [
         ("border-{direction}-style", "solid"),
-        ("border-{direction}-width", "1px"),
+        ("border-{direction}-width", "3px"),
     ],
     "thin": [
         ("border-{direction}-style", "solid"),
@@ -52,7 +55,7 @@ BORDER_STYLES = {
 
 
 class CssBuilder:
-    def __init__(self, get_css_color: Callable[[Color], str | None]) -> None:
+    def __init__(self, get_css_color: Callable[[Color | None], str | None]) -> None:
         """
         Initializes a CssBuilder instance.
 
@@ -164,7 +167,7 @@ class CssBuilder:
         self,
         style: str | None,
         direction: Literal["right", "left", "top", "bottom"],
-        color: Color,
+        color: Color | None,
         is_important: bool = False,
     ) -> List[Tuple[str, str]] | None:
         """
@@ -383,10 +386,12 @@ def create_get_css_from_cell(css_registry: CssRulesRegistry, css_builder: CssBui
             cell, css_builder, is_important=is_important
         )
 
-        merged_cell_map = merged_cell_map or {}
-        if merged_cell_map:
+        merged_cells = []
+        if isinstance(merged_cell_map, dict):
+            merged_cells = merged_cell_map.get("cells") or []
+        if merged_cells:
             # TODO edged_cells
-            for m_cell in merged_cell_map["cells"]:
+            for m_cell in merged_cells:
                 css_borders = css_borders + get_border_styles_from_cell(
                     m_cell, css_builder, is_important=is_important
                 )
@@ -420,30 +425,37 @@ def create_get_css_from_cell(css_registry: CssRulesRegistry, css_builder: CssBui
                 f"get_css_from_cell: got DifferentialStyle -->> {isinstance(cell, DifferentialStyle)}"
             )
 
-            if not isinstance(cell, DifferentialStyle):
-                cell_fill_pattern_type = getattr(cell_fill, "patternType")
-                # print(f"--> --> patternType: {cell_fill_pattern_type}")
-                if cell_fill_pattern_type is not None:
-                    if cell_fill_pattern_type == "solid":
-                        background_color = css_builder.background_color(
-                            getattr(cell_fill, "fgColor"), is_important=is_important
-                        )
-                        if background_color is not None:
-                            css_color.append(background_color)
-                    elif cell_fill_pattern_type is not None:
-                        # TODO patternType != 'solid'
-                        logging.warning(
-                            f"css (components): Pattern type is not supported: {cell_fill_pattern_type}"
-                        )
-            else:
-                cell_bgcolor = getattr(cell_fill, "bgColor")
+            cell_fill_pattern_type = getattr(cell_fill, "patternType", None)
+            is_differential_style = isinstance(cell, DifferentialStyle)
+            primary_fill_color = (
+                getattr(cell_fill, "fgColor", None)
+                if is_differential_style
+                else getattr(cell_fill, "fgColor", None)
+            )
+            secondary_fill_color = getattr(cell_fill, "bgColor", None)
 
-                if cell_bgcolor is not None:
-                    background_color = css_builder.background_color(
-                        cell_bgcolor, is_important=is_important
-                    )
-                    if background_color is not None:
-                        css_color.append(background_color)
+            if cell_fill_pattern_type == "solid":
+                background_color = css_builder.background_color(
+                    primary_fill_color or secondary_fill_color,
+                    is_important=is_important,
+                )
+                if background_color is not None:
+                    css_color.append(background_color)
+            elif cell_fill_pattern_type == "none":
+                css_color.append(
+                    css_builder.background_transparent(is_important=is_important)
+                )
+            elif cell_fill_pattern_type is not None:
+                # Excel pattern fills do not map 1:1 to CSS; approximate with a flat color.
+                background_color = css_builder.background_color(
+                    primary_fill_color or secondary_fill_color,
+                    is_important=is_important,
+                )
+                if background_color is not None:
+                    css_color.append(background_color)
+                logging.warning(
+                    f"css (components): Pattern type is approximated as flat color: {cell_fill_pattern_type}"
+                )
 
         if len(css_color) > 0:
             cell_classes.update([css_registry.register(css_color)])

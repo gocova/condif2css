@@ -39,6 +39,12 @@ Local development install:
 pip install -e .
 ```
 
+Or with `pdm` (including dev dependencies):
+
+```bash
+pdm sync --group dev
+```
+
 Or with `uv` (including dev dependencies):
 
 ```bash
@@ -104,13 +110,17 @@ css_text = "\n".join(css_registry.get_rules())
 
 ## Current Scope and Limitations
 
-- Conditional-format evaluation currently expects rules with exactly one formula.
+- Conditional-format evaluation supports:
+  - `expression` rules with exactly one formula
+  - `cellIs` rules (`equal`, `notEqual`, `greaterThan`, `greaterThanOrEqual`, `lessThan`, `lessThanOrEqual`, `between`, `notBetween`)
+  - `containsText`, `notContainsText`, `beginsWith`, and `endsWith`
 - Formula evaluation expects references that resolve to single cells.
 - Non-boolean formula results are ignored.
+- Other conditional formatting rule types are currently skipped with a warning.
 - Style extraction supports:
   - Borders: top/right/bottom/left
   - Alignment: horizontal/vertical
-  - Fill: solid fills (or `DifferentialStyle.fill.bgColor`)
+  - Fill: solid fills and approximated pattern fills
   - Font: size, color, bold, italic, underline
 - The package provides building blocks; no CLI is included.
 
@@ -119,8 +129,22 @@ css_text = "\n".join(css_registry.get_rules())
 Run tests:
 
 ```bash
-pytest
+pdm run pytest
 ```
+
+Build and check distributions:
+
+```bash
+pdm build
+python -m pip install --upgrade twine
+python -m twine check dist/*
+```
+
+## Releases
+
+- Versioning is SCM-driven from Git tags.
+- Stable releases must use SemVer tags in the format `vMAJOR.MINOR.PATCH` (example: `v1.4.0`).
+- Bitbucket Pipelines is configured to publish on matching `v*` tags and validates the strict stable SemVer format before publishing.
 
 ## Acknowledgements
 

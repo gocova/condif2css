@@ -1,6 +1,3 @@
-import sys
-sys.path.append('src')
-
 from condif2css import create_themed_css_color_resolver
 from openpyxl.styles import Color
 from condif2css.color import argb_to_css
@@ -31,7 +28,7 @@ def test_normalize_argb_color():
     testing_color = Color(rgb="AAAABBCC")
     result = normalize(testing_color)
     assert result == "AAAABBCC"
-    assert argb_to_css(result) == "rgba(170, 187, 204, 170)"
+    assert argb_to_css(result) == "rgba(170, 187, 204, 0.667)"
 
 def test_normalize_theme_no_tint():
     normalize = create_themed_css_color_resolver(testing_theme)

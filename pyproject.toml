@@ -12,7 +12,7 @@ dynamic = ["version"]
 dependencies = [
     "blake3>=1.0.4",
     "lxml>=5.3.0",
-    "mvin==0.13.0b6021601",
+    "mvin==0.14.0rc1",
     "openpyxl>=3.1.5",
 ]
 requires-python = ">=3.10,<4.0"
@@ -32,7 +32,7 @@ Issues = "https://bitbucket.org/gocova_dev/condif2css/issues"
 
 [tool.pyright]
 venvPath = "."
-venv = "venv"
+venv = ".venv"
 
 [tool.pytest.ini_options]
 addopts = ["--import-mode=importlib"]
@@ -45,5 +45,10 @@ requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
 [tool.pdm]
-version = { source = "file", path = "src/condif2css/__init__.py" }
 distribution = true
+
+[tool.pdm.version]
+source = "scm"
+tag_filter = "v*"
+tag_regex = '^v(?P<version>\d+\.\d+\.\d+)$'
+fallback_version = "0.0.0.dev0"

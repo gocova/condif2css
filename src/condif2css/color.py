@@ -39,7 +39,7 @@ def argb_to_ms_hls(argb: str) -> tuple[int, int, int]:
         return rgb_to_ms_hls(red, green, blue)
 
     else:
-        raise TypeError("argb arg shoud be an str")
+        raise TypeError("argb arg should be a str")
 
 
 def argb_to_css(argb: str) -> str:
@@ -62,11 +62,12 @@ def argb_to_css(argb: str) -> str:
         blue = int(argb[6:], 16)
         green = int(argb[4:6], 16)
         red = int(argb[2:4], 16)
-        alpha = int(argb[0:2], 16)
-        return f"rgba({red}, {green}, {blue}, {alpha})"
+        alpha = int(argb[0:2], 16) / RGBMAX
+        alpha_css = f"{alpha:.3f}".rstrip("0").rstrip(".")
+        return f"rgba({red}, {green}, {blue}, {alpha_css})"
 
     else:
-        raise TypeError("argb arg shoud be an str")
+        raise TypeError("argb arg should be a str")
 
 
 def rgb_to_ms_hls(red: float, green: float, blue: float) -> tuple[int, int, int]:

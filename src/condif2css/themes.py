@@ -57,7 +57,7 @@ def get_theme_colors(wb: Workbook, strict: bool = True) -> list[str]:
             if accent is None:
                 raise ThemeColorsError(f"Missing '{c}' color node in workbook theme.")
 
-            accent_values = accent.getchildren()
+            accent_values = list(accent)
             if len(accent_values) == 0:
                 raise ThemeColorsError(f"Color node '{c}' does not contain values.")
             accent_value = accent_values[0].attrib
