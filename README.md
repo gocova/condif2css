@@ -144,7 +144,7 @@ python -m twine check dist/*
 
 - Versioning is SCM-driven from Git tags.
 - Stable releases must use SemVer tags in the format `vMAJOR.MINOR.PATCH` (example: `v1.4.0`).
-- Bitbucket Pipelines is configured to publish on matching `v*` tags and validates the strict stable SemVer format before publishing.
+- GitHub Actions is configured to publish on matching `v*` tags and validates the strict stable SemVer format before publishing.
 
 ## Acknowledgements
 
