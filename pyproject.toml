@@ -26,9 +26,9 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://bitbucket.org/gocova_dev/condif2css"
-Repository = "https://bitbucket.org/gocova_dev/condif2css"
-Issues = "https://bitbucket.org/gocova_dev/condif2css/issues"
+Homepage = "https://github.com/gocova/condif2css"
+Repository = "https://github.com/gocova/condif2css"
+Issues = "https://github.com/gocova/condif2css/issues"
 
 [tool.pyright]
 venvPath = "."
