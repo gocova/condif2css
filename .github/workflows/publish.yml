@@ -30,6 +30,17 @@ jobs:
       - name: Install tooling
         run: python -m pip install --upgrade pip pdm twine
 
+      - name: Cache PDM
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pdm
+            ~/.cache/uv
+          key: pdm-${{ runner.os }}-3.12-${{ hashFiles('pdm.lock') }}
+          restore-keys: |
+            pdm-${{ runner.os }}-3.12-
+            pdm-${{ runner.os }}-
+
       - name: Install dependencies
         run: pdm sync --group dev
 

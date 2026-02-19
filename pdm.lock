@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:e121054377da5cb2f791c15b1ee7a9fd93b5195d0726e947d0f168f8a77d8630"
+content_hash = "sha256:3b7df98b1486ff879f3c70a7218a81a3ee03d261c7d36148858c060c5e72f27f"
 
 [[metadata.targets]]
 requires_python = "~=3.10"
@@ -501,11 +501,11 @@ files = [
 
 [[package]]
 name = "mvin"
-version = "0.14.0rc1"
+version = "0.15.0rc1"
 summary = ""
 files = [
-    {file = "mvin-0.14.0rc1-py3-none-any.whl", hash = "sha256:bcba946d62b80abad10a606efcbe80c8eff687641ef8aef9fe5c088c8bea16ca"},
-    {file = "mvin-0.14.0rc1.tar.gz", hash = "sha256:0a99d8097be4a227011045caba7db0758f5b18641519e07f303fc0aa2d509ac7"},
+    {file = "mvin-0.15.0rc1-py3-none-any.whl", hash = "sha256:9424da99db8be34cb41bedcef902340586467395d16639131588dcc418d67a50"},
+    {file = "mvin-0.15.0rc1.tar.gz", hash = "sha256:f3f6a1b3a99e0f8b7418036165daf661b61738848f64040cc78f00e634c1645b"},
 ]
 
 [[package]]
