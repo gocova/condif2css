@@ -12,7 +12,7 @@ dynamic = ["version"]
 dependencies = [
     "blake3>=1.0.4",
     "lxml>=5.3.0",
-    "mvin==0.14.0rc1",
+    "mvin==0.15.0rc1",
     "openpyxl>=3.1.5",
 ]
 requires-python = ">=3.10,<4.0"
@@ -50,5 +50,3 @@ distribution = true
 [tool.pdm.version]
 source = "scm"
 tag_filter = "v*"
-tag_regex = '^v(?P<version>\d+\.\d+\.\d+)$'
-fallback_version = "0.0.0.dev0"
