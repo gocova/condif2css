@@ -31,15 +31,16 @@ jobs:
       - name: Install tooling
         run: python -m pip install --upgrade pip pdm twine
 
+      - name: Check lockfile is up to date
+        run: pdm lock --check
+
       - name: Cache PDM
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.cache/pdm
-            ~/.cache/uv
-          key: pdm-${{ runner.os }}-3.12-${{ hashFiles('pdm.lock') }}
+          path: ~/.cache/pdm
+          key: pdm-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pdm.lock') }}
           restore-keys: |
-            pdm-${{ runner.os }}-3.12-
+            pdm-${{ runner.os }}-${{ matrix.python-version }}-
             pdm-${{ runner.os }}-
 
       - name: Install dependencies
